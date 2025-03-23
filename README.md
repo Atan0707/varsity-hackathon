@@ -1,4 +1,4 @@
-# Wallet Connect Template
+# Varsity Hackathon
 
 A modern Next.js 15 template for building Web3 applications with wallet connection capabilities.
 
@@ -29,17 +29,27 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Ethereum Development (Using Ethers)
 
-To learn more about Next.js, take a look at the following resources:
+You will need to import these first:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+import { ethers, Eip1193Provider } from "ethers";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To interact with contract:
+```bash
 
-## Deploy on Vercel
+#  Get current user's wallet address
+const { address: currentUserAddress } = useAppKitAccount(); # optional
+const { walletProvider } = useAppKitProvider("eip155");
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+const provider = new ethers.BrowserProvider(walletProvider as Eip1193Provider);
+const signer = await provider.getSigner();
+const contract = new ethers.Contract(Contract_Address, Contract_ABI, signer);
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Example usage
+const getId = await contract.getId();
+console.log(getId)
+```
