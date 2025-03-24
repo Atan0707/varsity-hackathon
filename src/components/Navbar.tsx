@@ -109,11 +109,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-20 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 dark:bg-black/90 backdrop-blur-sm shadow-md"
-          : "bg-white dark:bg-black"
-      } border-b border-gray-200 dark:border-gray-800`}
+      className={`fixed top-0 left-0 w-full z-20 transition-all duration-300 ${scrolled
+        ? "bg-white/90 dark:bg-black/90 backdrop-blur-sm shadow-md"
+        : "bg-white dark:bg-black"
+        } border-b border-gray-200 dark:border-gray-800`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -125,80 +124,52 @@ export default function Navbar() {
             </Link>
             <div className="hidden md:ml-6 md:flex md:space-x-4">
               <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                }`}
+                href="/mintItem"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  }`}
               >
-                Page 1
+                Mint
               </Link>
               <Link
                 href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  }`}
               >
                 Page 2
               </Link>
 
               <Link
                 href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  }`}
               >
                 Page 3
               </Link>
               <Link
                 href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  }`}
               >
                 Page 4
               </Link>
               <Link
                 href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                  }`}
               >
                 Page 5
               </Link>
-              {isConnected && (
-                <Link
-                  href="#"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                    isActive("#") || isActive("#")
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  My Profile
-                </Link>
-              )}
+
             </div>
           </div>
 
@@ -297,11 +268,10 @@ export default function Navbar() {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800">
               <Link
                 href="#"
-                className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <span className="relative flex h-2 w-2 mr-2">
@@ -312,44 +282,40 @@ export default function Navbar() {
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 2
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 3
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 4
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
+                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 5
@@ -357,11 +323,10 @@ export default function Navbar() {
               {isConnected && (
                 <Link
                   href="#"
-                  className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${
-                    isActive("#") || isActive("#")
-                      ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                  className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${isActive("#") || isActive("#")
+                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <svg
@@ -376,10 +341,10 @@ export default function Navbar() {
                       clipRule="evenodd"
                     />
                   </svg>
-                 My Profile
+                  My Profile
                 </Link>
               )}
-              
+
             </div>
           </motion.div>
         )}
