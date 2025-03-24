@@ -35,6 +35,7 @@ export default function RootLayout({
           <Toaster position="top-right" richColors />
           <div className="pt-16">
             {children}
+            
           </div>
         </AppKit>
       </body>
