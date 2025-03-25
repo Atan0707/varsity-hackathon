@@ -7,6 +7,20 @@ import { useState } from "react";
 import { CONTRACT_ADDRESS } from "@/utils/config";
 import ABI from "../../contract/abi.json"
 
+// Add this interface for GeolocationPosition
+interface GeolocationPositionExtended {
+    coords: {
+        latitude: number;
+        longitude: number;
+        accuracy: number;
+        altitude: number | null;
+        altitudeAccuracy: number | null;
+        heading: number | null;
+        speed: number | null;
+    };
+    timestamp: number;
+}
+
 export default function Home() {
     const { address, isConnected } = useAppKitAccount();
     const { walletProvider } = useAppKitProvider("eip155")
@@ -29,6 +43,42 @@ export default function Home() {
     // Check if Web NFC is supported
     const isNfcSupported =
         typeof window !== "undefined" && "NDEFReader" in window;
+
+    // Add loading state for location fetch
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+    // Function to get user's country
+    const getCurrentLocation = async () => {
+        setIsLoadingLocation(true);
+        try {
+            // First get coordinates using browser's Geolocation API with proper typing
+            const position = await new Promise<GeolocationPositionExtended>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => resolve(pos as GeolocationPositionExtended),
+                    reject,
+                    { enableHighAccuracy: true }
+                );
+            });
+
+            const { latitude, longitude } = position.coords;
+
+            // Use reverse geocoding to get country name
+            const response = await fetch(
+                `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${process.env.NEXT_PUBLIC_OPENCAGE_API_KEY}&language=en`
+            );
+
+            const data = await response.json();
+            if (data.results && data.results.length > 0) {
+                const country = data.results[0].components.country;
+                setLocation(country);
+            }
+        } catch (error) {
+            console.error('Error getting location:', error);
+            alert('Unable to get your location. Please enter it manually.');
+        } finally {
+            setIsLoadingLocation(false);
+        }
+    };
 
     // Write function
     async function handleWrite() {
@@ -216,13 +266,29 @@ export default function Home() {
                         <label className="block mb-1 text-sm font-medium">
                             Initial Location
                         </label>
-                        <input
-                            type="text"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            placeholder="Singapore"
-                            className="w-full p-2 border rounded-lg"
-                        />
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="Singapore"
+                                className="flex-1 p-2 border rounded-lg"
+                            />
+                            <button
+                                onClick={getCurrentLocation}
+                                disabled={isLoadingLocation}
+                                className={`px-4 py-2 rounded-lg font-medium ${isLoadingLocation
+                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    : "bg-blue-600 text-white hover:bg-blue-700"
+                                    }`}
+                            >
+                                {isLoadingLocation ? (
+                                    <span>Loading...</span>
+                                ) : (
+                                    <span>📍 Get Location</span>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     <button
