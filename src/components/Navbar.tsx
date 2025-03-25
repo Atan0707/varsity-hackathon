@@ -81,12 +81,6 @@ export default function Navbar() {
 
   // Handle wallet connection
   const handleConnectClick = () => {
-    // toast.info('Connecting Wallet', {
-    //   description: 'Please approve the connection request in your wallet.',
-    //   icon: '🔗',
-    //   duration: 100,  // Auto dismiss after 5 seconds
-    //   dismissible: true, // Allow manual dismissal
-    // })
     open();
   };
 
@@ -109,153 +103,115 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-20 transition-all duration-300 ${scrolled
-        ? "bg-white/90 dark:bg-black/90 backdrop-blur-sm shadow-md"
-        : "bg-white dark:bg-black"
-        } border-b border-gray-200 dark:border-gray-800`}
+      className={`w-full py-4 bg-[rgb(256,252,228)] z-20 shadow-sm`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                Wallet Connect Template
-              </span>
+      <div className="container mx-auto px-6">
+        <div className="flex justify-between items-center">
+          {/* Left side navigation */}
+          <div className="flex items-center space-x-8">
+            <Link href="/" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Home
             </Link>
-            <div className="hidden md:ml-6 md:flex md:space-x-4">
-              <Link
-                href="/mintItem"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-              >
-                Mint
-              </Link>
-              <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-              >
-                Page 2
-              </Link>
-
-              <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-              >
-                Page 3
-              </Link>
-              <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-              >
-                Page 4
-              </Link>
-              <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-              >
-                Page 5
-              </Link>
-
-            </div>
+            <Link href="/mintItem" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Mint
+            </Link>
+            <Link href="/pool" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Pool
+            </Link>
+            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Page 3
+            </Link>
+            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Page 4
+            </Link>
+            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Page 5
+            </Link>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Center logo */}
+          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
+            <Link href="/" className="flex-shrink-0">
+              <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
+                blockgiving
+              </span>
+            </Link>
+          </div>
+
+          {/* Right side links/buttons */}
+          <div className="flex items-center space-x-6">
+            <Link href="/support" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Support Center
+            </Link>
+            
             {mounted && (
               <>
                 {isConnected && address ? (
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => {
-                        open({ view: "Account" });
-                        toast("Account Details", {
-                          description: "Viewing your wallet account details.",
-                          icon: "👤",
-                        });
-                      }}
-                      className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs sm:text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-                    >
-                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                      {formatAddress(address)}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => {
+                      open({ view: "Account" });
+                      toast("Account Details", {
+                        description: "Viewing your wallet account details.",
+                        icon: "👤",
+                      });
+                    }}
+                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
+                  >
+                    {formatAddress(address)}
+                  </button>
                 ) : (
                   <button
                     onClick={handleConnectClick}
-                    className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-600 text-white text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
                   >
                     Connect
                   </button>
                 )}
-                {/* <button
-                  onClick={() => {
-                    open({ view: "Networks" });
-                    toast("Network Selection", {
-                      description: "Choose a blockchain network to connect to.",
-                      icon: "🌐",
-                    });
-                  }}
-                  className="hidden sm:block px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-gray-200 dark:border-gray-700 text-xs sm:text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  Networks
-                </button> */}
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none md:hidden"
-                  aria-expanded={mobileMenuOpen}
-                >
-                  <span className="sr-only">Open main menu</span>
-                  <svg
-                    className={`${mobileMenuOpen ? "hidden" : "block"} h-6 w-6`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                  <svg
-                    className={`${mobileMenuOpen ? "block" : "hidden"} h-6 w-6`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
               </>
             )}
+            
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-[rgba(15,45,50,255)] hover:bg-[rgba(15,45,50,0.1)] focus:outline-none md:hidden"
+              aria-expanded={mobileMenuOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              <svg
+                className={`${mobileMenuOpen ? "hidden" : "block"} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                className={`${mobileMenuOpen ? "block" : "hidden"} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu, with animation */}
+      {/* Mobile menu - kept for mobile functionality */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -265,86 +221,69 @@ export default function Navbar() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800">
-              <Link
-                href="#"
-                className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span className="relative flex h-2 w-2 mr-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            <div className="px-4 pt-2 pb-3 space-y-3 bg-[rgb(256,252,228)] shadow-lg">
+              <div className="flex justify-center pb-4 mb-2 border-b border-[rgba(15,45,50,0.1)]">
+                <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
+                  blockgiving
                 </span>
-                Page 1
-              </Link>
+              </div>
               <Link
-                href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                href="/"
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Page 2
+                Home
+              </Link>
+              <Link
+                href="/mintItem"
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Mint
+              </Link>
+              <Link
+                href="/pool"
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pool
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 3
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 4
               </Link>
               <Link
                 href="#"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${isActive("#")
-                  ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Page 5
               </Link>
-              {isConnected && (
-                <Link
-                  href="#"
-                  className={`px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${isActive("#") || isActive("#")
-                    ? "text-blue-600 dark:text-blue-400 bg-gray-50 dark:bg-gray-800"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    }`}
-                  onClick={() => setMobileMenuOpen(false)}
+              <Link
+                href="#"
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Support Center
+              </Link>
+              {!isConnected && (
+                <button
+                  onClick={handleConnectClick}
+                  className="w-full mt-2 px-4 py-2 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  My Profile
-                </Link>
+                  Connect
+                </button>
               )}
-
             </div>
           </motion.div>
         )}
