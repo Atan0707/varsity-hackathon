@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAppKit } from "@reown/appkit/react";
 import { getAllPoolsFromChain } from "@/utils/contract";
 import { Pool, formatCurrency } from "@/utils/poolData";
+import { PoolLogo } from '@/components/ui/pool-logo';
 
 export default function Home() {
   // Add the wallet connection functionality
@@ -100,10 +101,13 @@ export default function Home() {
                 {pools.slice(0, 3).map((pool) => (
                   <div key={pool.id} className="bg-white rounded-lg overflow-hidden shadow-md">
                     <div className="h-48 bg-gray-300 relative">
-                      <img 
-                        src={pool.logoUrl || `https://placehold.co/400x200/e9e9dc/0c252a?text=${encodeURIComponent(pool.title)}`}
-                        alt={pool.title} 
+                      <PoolLogo
+                        logoUrl={pool.logoUrl}
+                        title={pool.title}
+                        width={400}
+                        height={200}
                         className="w-full h-full object-cover"
+                        containerClassName="w-full h-full"
                       />
                     </div>
                     <div className="p-6">
@@ -127,7 +131,7 @@ export default function Home() {
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff3b30" className="w-5 h-5 mr-2">
                           <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
                         </svg>
-                        <span className="font-medium">{pool.investors} Donors</span>
+                        <span className="font-medium">{pool.donors} Donors</span>
                       </div>
 
                       <div className="mt-4">

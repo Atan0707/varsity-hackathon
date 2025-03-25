@@ -109,21 +109,38 @@ const ProgressTracking: React.FC<ProgressTrackingProps> = ({ pool }) => {
     });
   };
   
-  // Prepare timeline events combining both funds released events and pool creation
+  // Prepare timeline events combining both funds released events, pending checkpoints, and pool creation
   const timelineEvents = React.useMemo(() => {
     const events = [];
     
-    // Add checkpoint events
+    // Create a map of completed checkpoints from subgraph data
+    const completedCheckpointsMap = new Map();
     if (checkpointsData && checkpointsData.length > 0) {
-      checkpointsData.forEach((event: FundsReleasedEvent, index: number) => {
-        events.push({
+      checkpointsData.forEach((event: FundsReleasedEvent) => {
+        completedCheckpointsMap.set(event.checkpoint, {
           date: formatTimestamp(event.blockTimestamp),
-          status: `Checkpoint: ${event.checkpoint}`,
-          description: `${(parseInt(event.amount) / 1e18).toFixed(2)} ETH released`,
-          isCompleted: true,
-          highlight: index === 0, // Highlight the most recent checkpoint
-          icon: 'check',
+          amount: event.amount,
           transactionHash: event.transactionHash
+        });
+      });
+    }
+    
+    // Add all checkpoints from pool data, marking them as completed or pending
+    if (pool.checkpoints && pool.checkpoints.length > 0) {
+      pool.checkpoints.forEach((checkpoint, index) => {
+        const completedData = completedCheckpointsMap.get(checkpoint);
+        const isCompleted = !!completedData;
+        
+        events.push({
+          date: isCompleted ? completedData.date : 'Pending',
+          status: `Checkpoint: ${checkpoint}`,
+          description: isCompleted 
+            ? `${(parseInt(completedData.amount) / 1e18).toFixed(2)} ETH released` 
+            : 'Awaiting completion',
+          isCompleted,
+          highlight: isCompleted && index === pool.currentCheckpointIndex,
+          icon: isCompleted ? 'check' : 'pending',
+          transactionHash: isCompleted ? completedData.transactionHash : undefined
         });
       });
     }
@@ -141,8 +158,33 @@ const ProgressTracking: React.FC<ProgressTrackingProps> = ({ pool }) => {
       });
     }
     
-    return events;
-  }, [checkpointsData, poolCreationData]);
+    // Sort events by completion status then by date (if available)
+    return events.sort((a, b) => {
+      // First sort by completion status (completed first)
+      if (a.isCompleted && !b.isCompleted) return -1;
+      if (!a.isCompleted && b.isCompleted) return 1;
+      
+      // Then sort by checkpoint index (for both completed and pending)
+      if (a.status.includes('Checkpoint') && b.status.includes('Checkpoint')) {
+        const aIndex = parseInt(a.status.split('Checkpoint: ')[1]);
+        const bIndex = parseInt(b.status.split('Checkpoint: ')[1]);
+        if (!isNaN(aIndex) && !isNaN(bIndex)) {
+          return aIndex - bIndex;
+        }
+      }
+      
+      // If one is campaign creation event, put it at the end
+      if (a.status === 'Campaign Created') return 1;
+      if (b.status === 'Campaign Created') return -1;
+      
+      // If both are completed, sort by date (descending)
+      if (a.isCompleted && b.isCompleted && a.date !== 'Pending' && b.date !== 'Pending') {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+      
+      return 0;
+    });
+  }, [checkpointsData, poolCreationData, pool.checkpoints, pool.currentCheckpointIndex]);
   
   if (checkpointsLoading || poolCreationLoading) {
     return (
@@ -183,8 +225,10 @@ const ProgressTracking: React.FC<ProgressTrackingProps> = ({ pool }) => {
                     </svg>
                   </div>
                 ) : (
-                  <div className="w-9 h-9 flex items-center justify-center z-10">
-                    <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                  <div className="w-9 h-9 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-400 z-10 bg-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
                   </div>
                 )}
               </div>
@@ -196,26 +240,29 @@ const ProgressTracking: React.FC<ProgressTrackingProps> = ({ pool }) => {
                 </div>
                 
                 <div className={`font-medium ${
-                  event.highlight ? 'text-green-600' : 'text-gray-700'
+                  event.highlight ? 'text-green-600' : 
+                  event.isCompleted ? 'text-gray-700' : 'text-gray-400'
                 }`}>
                   {event.status}
                 </div>
                 
-                <div className="text-gray-600 text-sm">
+                <div className={`${event.isCompleted ? 'text-gray-600' : 'text-gray-400'} text-sm`}>
                   {event.description}
                 </div>
                 
-                {/* View Transaction link */}
-                <div className="mt-1">
-                  <a 
-                    href={`https://sepolia.scrollscan.com/tx/${event.transactionHash}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View Transaction
-                  </a>
-                </div>
+                {/* View Transaction link - only show for completed events */}
+                {event.isCompleted && event.transactionHash && (
+                  <div className="mt-1">
+                    <a 
+                      href={`https://sepolia.scrollscan.com/tx/${event.transactionHash}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      View Transaction
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           )) : (

@@ -11,7 +11,7 @@ export interface Pool {
   currentAmount: number;
   targetAmount: number;
   percentageRaised: number;
-  investors: number;
+  donors: number;
   largestInvestment: number;
   daysLeft: number;
   logoUrl: string;
@@ -32,10 +32,9 @@ export const getPoolById = (id: string): Pool | undefined => {
 };
 
 export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('en-MY', {
-    style: 'currency',
-    currency: 'MYR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount).replace('MYR', 'RM');
+  return new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  }).format(amount) + ' ETH';
 }; 
