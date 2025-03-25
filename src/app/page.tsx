@@ -1,12 +1,32 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useAppKit } from "@reown/appkit/react";
+import { getAllPoolsFromChain } from "@/utils/contract";
+import { Pool, formatCurrency } from "@/utils/poolData";
 
 export default function Home() {
   // Add the wallet connection functionality
   const { open } = useAppKit();
+  const [pools, setPools] = useState<Pool[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchPools = async () => {
+      try {
+        setLoading(true);
+        const poolsData = await getAllPoolsFromChain();
+        setPools(poolsData);
+      } catch (error) {
+        console.error('Error fetching pools:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPools();
+  }, []);
   
   // Handle wallet connection
   const handleConnectClick = () => {
@@ -29,7 +49,7 @@ export default function Home() {
               Transparent Giving
             </h1>
             <p className="text-lg md:text-2xl text-white mb-12 max-w-3xl">
-            Track donations, trust the process
+              Track donations, trust the process
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -70,98 +90,64 @@ export default function Home() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Fundraiser Card 1 */}
-              <div className="bg-white rounded-lg overflow-hidden shadow-md">
-                <div className="h-48 bg-gray-300 relative">
-                  <img 
-                    src="https://placehold.co/400x200/e9e9dc/0c252a?text=MRC+Flood+Action" 
-                    alt="MRC Flood Action Fund" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0c252a] mb-2">MRC Flood Action Fund</h3>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-bold text-[#0c252a]">MYR 4,158</div>
-                    <div className="text-sm text-gray-500">raised out of MYR 4,158 goal</div>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                    <div className="bg-[#d9ff56] h-2 rounded-full w-[100%]"></div>
-                  </div>
-                  
-                  <div className="flex items-center text-[#0c252a]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff3b30" className="w-5 h-5 mr-2">
-                      <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                    </svg>
-                    <span className="font-medium">50 Donors</span>
-                  </div>
-                </div>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                <p className="ml-4 text-lg text-gray-600">Loading pool data...</p>
               </div>
-              
-              {/* Fundraiser Card 2 */}
-              <div className="bg-white rounded-lg overflow-hidden shadow-md">
-                <div className="h-48 bg-gray-300 relative">
-                  <img 
-                    src="https://placehold.co/400x200/e9e9dc/0c252a?text=Long+Ducker+2025" 
-                    alt="Long Ducker 2025" 
-                    className="w-full h-full object-cover"
-                  />
-                  
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0c252a] mb-2">Long Ducker 2025</h3>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-bold text-[#0c252a]">MYR 23,925</div>
-                    <div className="text-sm text-gray-500">raised out of MYR 23,925 goal</div>
+            ) : pools.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {pools.slice(0, 3).map((pool) => (
+                  <div key={pool.id} className="bg-white rounded-lg overflow-hidden shadow-md">
+                    <div className="h-48 bg-gray-300 relative">
+                      <img 
+                        src={pool.logoUrl || `https://placehold.co/400x200/e9e9dc/0c252a?text=${encodeURIComponent(pool.title)}`}
+                        alt={pool.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-[#0c252a] mb-2">{pool.title}</h3>
+                      
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-bold text-[#0c252a]">{formatCurrency(pool.currentAmount)}</div>
+                        <div className="text-sm text-gray-500">
+                          raised out of {formatCurrency(pool.targetAmount || 0)} goal
+                        </div>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                        <div 
+                          className="bg-[#d9ff56] h-2 rounded-full" 
+                          style={{ width: `${pool.percentageRaised || 0}%` }}
+                        ></div>
+                      </div>
+                      
+                      <div className="flex items-center text-[#0c252a]">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff3b30" className="w-5 h-5 mr-2">
+                          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                        </svg>
+                        <span className="font-medium">{pool.investors} Donors</span>
+                      </div>
+
+                      <div className="mt-4">
+                        <Link 
+                          href={`/pool/${pool.id}`}
+                          className="block w-full text-center py-2 px-4 bg-[#d9ff56] text-[#0c252a] font-medium rounded-md hover:bg-opacity-90 transition"
+                        >
+                          View Pool
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                    <div className="bg-[#d9ff56] h-2 rounded-full w-[5%]"></div>
-                  </div>
-                  
-                  <div className="flex items-center text-[#0c252a]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff3b30" className="w-5 h-5 mr-2">
-                      <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                    </svg>
-                    <span className="font-medium">47 Donors</span>
-                  </div>
-                </div>
+                ))}
               </div>
-              
-              {/* Fundraiser Card 3 */}
-              <div className="bg-white rounded-lg overflow-hidden shadow-md">
-                <div className="h-48 bg-gray-300 relative">
-                  <img 
-                    src="https://placehold.co/400x200/e9e9dc/0c252a?text=MSI+Flood+Relief" 
-                    alt="MSI Flood Relief" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0c252a] mb-2">MSI Flood Relief</h3>
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-bold text-[#0c252a]">MYR 725</div>
-                    <div className="text-sm text-gray-500">raised out of MYR 725 goal</div>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                    <div className="bg-[#d9ff56] h-2 rounded-full w-[10%]"></div>
-                  </div>
-                  
-                  <div className="flex items-center text-[#0c252a]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#ff3b30" className="w-5 h-5 mr-2">
-                      <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-                    </svg>
-                    <span className="font-medium">26 Donors</span>
-                  </div>
-                </div>
+            ) : (
+              <div className="bg-white rounded-lg p-8 text-center">
+                <p className="text-lg text-gray-700">No donation pools available at the moment.</p>
+                <p className="text-gray-500 mt-2">Check back soon!</p>
               </div>
-            </div>
+            )}
             
             <div className="flex justify-center mt-12">
               <Link 
@@ -174,9 +160,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      
-      {/* Platform Preview Section */}
-      
     </div>
   );
 }
