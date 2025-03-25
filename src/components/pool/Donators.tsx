@@ -1,30 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pool } from '@/utils/poolData';
+import { getPoolDonators, Donator } from '@/utils/contract';
 
 interface DonatorsProps {
   pool: Pool;
 }
 
-// Sample donator data - in a real app, this would come from an API
-const sampleDonators = [
-  { id: 1, name: 'Ahmad bin Abdullah', amount: 124800, date: '2023-03-15' },
-  { id: 2, name: 'Sarah Johnson', amount: 75000, date: '2023-03-14' },
-  { id: 3, name: 'Mohammed Al-Farsi', amount: 50000, date: '2023-03-12' },
-  { id: 4, name: 'Li Wei', amount: 35000, date: '2023-03-10' },
-  { id: 5, name: 'Anonymous', amount: 25000, date: '2023-03-09' },
-  { id: 6, name: 'Natasha Kuznetsov', amount: 20000, date: '2023-03-07' },
-  { id: 7, name: 'Anonymous', amount: 15000, date: '2023-03-05' },
-  { id: 8, name: 'Rajesh Patel', amount: 12500, date: '2023-03-03' },
-  { id: 9, name: 'Sofia Garcia', amount: 6700, date: '2023-03-01' },
-];
+const truncateAddress = (address: string): string => {
+  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+};
 
 const Donators: React.FC<DonatorsProps> = ({ pool }) => {
+  const [donators, setDonators] = useState<Donator[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDonators = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const donatorData = await getPoolDonators(pool.id);
+        setDonators(donatorData);
+      } catch (error) {
+        console.error('Error fetching donators:', error);
+        setError('Failed to load donor data from blockchain');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (pool.id) {
+      fetchDonators();
+    }
+  }, [pool.id]);
+
+  // Format the timestamp to a human-readable date
+  const formatTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-MY', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 my-6">
       <div className="flex justify-between items-center mb-6 border-b pb-4">
         <h2 className="text-2xl font-bold">Recent Donators</h2>
         <div className="text-sm text-gray-600">
-          Total <span className="font-semibold">{pool.investors}</span> donators
+          Total <span className="font-semibold">{donators.length}</span> donators
         </div>
       </div>
       
@@ -34,7 +62,7 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Donator
+                  Donator Address
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Amount
@@ -45,35 +73,60 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sampleDonators.map((donator) => (
-                <tr key={donator.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {donator.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gray-900">
-                      RM {donator.amount.toLocaleString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {new Date(donator.date).toLocaleDateString()}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-4 text-center">
+                    <div className="flex justify-center items-center space-x-2">
+                      <div className="w-5 h-5 border-t-2 border-green-500 rounded-full animate-spin"></div>
+                      <span className="text-gray-500">Loading blockchain data...</span>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-4 text-center text-red-500">
+                    {error}
+                  </td>
+                </tr>
+              ) : donators.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                    No donations found for this pool yet.
+                  </td>
+                </tr>
+              ) : (
+                donators.map((donator, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {truncateAddress(donator.address)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-semibold text-gray-900">
+                         {donator.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})} ETH
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {formatTimestamp(donator.timestamp)}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
       
-      <div className="mt-6 text-center">
-        <button className="text-green-600 hover:text-green-800 font-medium text-sm">
-          View All Donators
-        </button>
-      </div>
+      {donators.length > 0 && (
+        <div className="mt-6 text-center">
+          <button className="text-green-600 hover:text-green-800 font-medium text-sm">
+            View All Donators
+          </button>
+        </div>
+      )}
     </div>
   );
 };

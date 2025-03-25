@@ -16,13 +16,18 @@ export interface Pool {
   daysLeft: number;
   logoUrl: string;
   description: string;
+  checkpoints?: string[];
+  currentCheckpointIndex?: number;
+  checkpointReleaseStatus?: boolean[];
 }
 
 export const getAllPools = (): Pool[] => {
+  console.warn('getAllPools is deprecated, use getAllPoolsFromChain instead');
   return pools as Pool[];
 };
 
 export const getPoolById = (id: string): Pool | undefined => {
+  console.warn('getPoolById is deprecated, use getPoolByIdFromChain instead');
   return pools.find((pool: Pool) => pool.id === id);
 };
 
