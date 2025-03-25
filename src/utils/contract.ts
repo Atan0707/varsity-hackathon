@@ -32,7 +32,7 @@ export const getAllPoolsFromChain = async (): Promise<Pool[]> => {
     const [ids, names, activeStatus, totalDonated] = await contract.getAllPools();
     
     // Create pool objects from blockchain data
-    return ids.map((id: bigint, index: number) => {
+    const pools = ids.map((id: bigint, index: number) => {
       const poolId = Number(id);
       const totalAmount = Number(totalDonated[index]);
       
@@ -47,16 +47,50 @@ export const getAllPoolsFromChain = async (): Promise<Pool[]> => {
         currentAmount: totalAmount / 1e18, // Convert from wei to ether
         targetAmount: 0, // Not directly available from the contract
         percentageRaised: 0, // Will be calculated once we have target amount
-        investors: 0, // Will be fetched separately
+        donors: 0, // Will be fetched separately
         largestInvestment: 0, // Not directly available from the contract
         daysLeft: 0, // Not directly available from the contract
-        logoUrl: '', // This isn't stored in the contract
+        logoUrl: '', // Will be fetched separately
         description: '', // This isn't stored in the contract
       };
     });
+    
+    // Fetch logo URIs for each pool
+    const poolsWithLogos = await Promise.all(pools.map(async (pool: Pool) => {
+      try {
+        const logoURI = await getPoolLogoURI(Number(pool.id));
+        return {
+          ...pool,
+          logoUrl: logoURI || '/logos/habibi.jpg', // Use blockchain URI if available, else use placeholder
+        };
+      } catch (error) {
+        console.error(`Error fetching logo for pool ${pool.id}:`, error);
+        return pool;
+      }
+    }));
+    
+    return poolsWithLogos;
   } catch (error) {
     console.error('Error getting pools from chain:', error);
     return [];
+  }
+};
+
+export const getPoolLogoURI = async (poolId: number): Promise<string | undefined> => {
+  try {
+    const contract = getReadOnlyContract();
+    // Get items from the pool - destructure only what we need
+    const [, , imageURIs] = await contract.getPoolItemsWithDetails(poolId);
+    
+    // Return the first item's image URI if it exists
+    if (imageURIs && imageURIs.length > 0) {
+      return imageURIs[0];
+    }
+    
+    return undefined;
+  } catch (error) {
+    console.error('Error getting pool logo URI:', error);
+    return undefined;
   }
 };
 
@@ -72,16 +106,16 @@ export const getPoolByIdFromChain = async (id: string, walletProvider?: unknown)
     const [
       name,
       totalDonated,
-      totalWithdrawn, // Used for contract data, not for UI
+      , // Skip totalWithdrawn
       active,
       checkpoints,
       currentCheckpointIndex,
       checkpointReleaseStatus
     ] = await contract.getPoolDetails(poolId);
     
-    // Get pool items to count investors
+    // Get pool items to count donors
     const itemTokens = await contract.getPoolItems(poolId);
-    const investorCount = itemTokens.length;
+    const donorCount = itemTokens.length;
     
     // Convert totalDonated from wei to ether
     const donatedAmount = Number(totalDonated) / 1e18;
@@ -90,22 +124,25 @@ export const getPoolByIdFromChain = async (id: string, walletProvider?: unknown)
     const targetAmount = donatedAmount * 1.5; // Just an example
     const percentageRaised = Math.min(Math.floor((donatedAmount / targetAmount) * 100), 100);
     
+    // Try to get the logo URI from the first pool item
+    const logoURI = await getPoolLogoURI(poolId);
+    
     return {
       id: id,
       title: name,
-      tagline: `Donation pool with ${checkpoints.length} checkpoints`,
-      categories: ['DONATION', 'BLOCKCHAIN'],
+      tagline: `${name} Crowdfunding Pool`,
+      categories: ['CROWDFUNDING',],
       badges: active ? ['ACTIVE'] : ['INACTIVE'],
       videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
       status: active ? 'Live' : 'Closed',
       currentAmount: donatedAmount,
       targetAmount: targetAmount,
       percentageRaised: percentageRaised,
-      investors: investorCount,
+      donors: donorCount,
       largestInvestment: donatedAmount * 0.3, // Just an example
       daysLeft: active ? 14 : 0, // Just an example
-      logoUrl: '/logos/habibi.jpg', // Placeholder
-      description: `This donation pool has raised ${donatedAmount} ETH with ${checkpoints.length} checkpoints. Currently at checkpoint ${Number(currentCheckpointIndex) + 1}.`,
+      logoUrl: logoURI || '/logos/habibi.jpg', // Use blockchain URI if available, else use placeholder
+      description: `This crowdfunding pool for ${name} is a platform for individuals and organizations to raise funds for their projects.`,
       checkpoints, 
       currentCheckpointIndex: Number(currentCheckpointIndex),
       checkpointReleaseStatus

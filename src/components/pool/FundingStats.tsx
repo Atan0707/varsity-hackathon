@@ -7,13 +7,6 @@ import { SUBGRAPH_URL } from '@/utils/config';
 
 interface FundingStatsProps {
   poolId: string;
-  status?: string;
-  currentAmount?: number;
-  targetAmount?: number;
-  percentageRaised?: number;
-  investors?: number;
-  largestInvestment?: number;
-  daysLeft?: number;
   onDonationSuccess?: () => void;
 }
 
@@ -42,13 +35,6 @@ const formatEth = (amount: number): string => {
 
 const FundingStats: React.FC<FundingStatsProps> = ({
   poolId,
-  status,
-  currentAmount,
-  targetAmount,
-  percentageRaised,
-  investors,
-  largestInvestment, // eslint-disable-line @typescript-eslint/no-unused-vars
-  daysLeft,
   onDonationSuccess,
 }) => {
   // GraphQL query to fetch pool data from the subgraph
@@ -196,14 +182,6 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     }
   };
 
-  // Use props if provided, otherwise fall back to subgraph data
-  const finalStatus = status || (poolData?.status);
-  const finalCurrentAmount = currentAmount !== undefined ? currentAmount : (poolData?.currentAmount || 0);
-  const finalTargetAmount = targetAmount !== undefined ? targetAmount : (poolData?.targetAmount || 0.5);
-  const finalPercentageRaised = percentageRaised !== undefined ? percentageRaised : (poolData?.percentageRaised || 0);
-  const finalDonators = investors !== undefined ? investors : (poolData?.donators || 0);
-  const finalDaysLeft = daysLeft !== undefined ? daysLeft : (poolData?.daysLeft || 0);
-
   if (isLoading) {
     return (
       <div className="w-full h-full bg-white p-6 rounded-lg shadow-sm flex flex-col items-center justify-center">
@@ -251,15 +229,25 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     );
   }
 
+  // Safe access to poolData values
+  const {
+    status: currentStatus,
+    currentAmount: currentAmountValue,
+    targetAmount: targetAmountValue,
+    percentageRaised: percentageRaisedValue,
+    donators: donatorsValue,
+    daysLeft: daysLeftValue
+  } = poolData;
+
   return (
     <div className="w-full h-full bg-white p-6 rounded-lg shadow-sm flex flex-col">
       <div className="flex items-center justify-end mb-4">
         <span className={`inline-flex items-center px-2 py-1 text-sm font-medium rounded-lg ${
-          finalStatus === 'Live' 
+          currentStatus === 'Live' 
             ? 'text-green-600 bg-green-50' 
             : 'text-gray-600 bg-gray-50'
         }`}>
-          {finalStatus === 'Live' ? (
+          {currentStatus === 'Live' ? (
             <svg className="w-3 h-3 mr-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14"></path>
             </svg>
@@ -268,35 +256,35 @@ const FundingStats: React.FC<FundingStatsProps> = ({
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           )}
-          {finalStatus}
+          {currentStatus}
         </span>
       </div>
 
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-black mb-1">
-          {formatEth(finalCurrentAmount)}
+          {formatEth(currentAmountValue)}
         </h2>
         <p className="text-sm text-gray-600 uppercase">
-          {finalPercentageRaised}% OF THE MIN.TARGET ({formatEth(finalTargetAmount)})
+          {percentageRaisedValue}% OF THE MIN.TARGET ({formatEth(targetAmountValue)})
         </p>
         <div className="mt-2">
-          <ProgressBar percentage={finalPercentageRaised} />
+          <ProgressBar percentage={percentageRaisedValue} />
         </div>
       </div>
 
       <div className="space-y-6">
         <div>
-          <div className="text-2xl font-bold mb-1">{finalDonators}</div>
+          <div className="text-2xl font-bold mb-1">{donatorsValue}</div>
           <div className="text-sm text-gray-600 uppercase">Donators</div>
         </div>
 
         <div>
-          <div className="text-2xl font-bold mb-1">{finalDaysLeft} days</div>
+          <div className="text-2xl font-bold mb-1">{daysLeftValue} days</div>
           <div className="text-sm text-gray-600 uppercase">Days Left</div>
         </div>
 
         <div>
-          {finalStatus === 'Live' ? (
+          {currentStatus === 'Live' ? (
             <DonateButton poolId={poolId} onSuccess={handleDonationSuccess} />
           ) : (
             <button 

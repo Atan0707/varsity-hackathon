@@ -2,7 +2,6 @@
 
 import React, { useState, use, useEffect } from 'react';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import { getPoolByIdFromChain } from '@/utils/contract';
 import { Pool } from '@/utils/poolData';
 import { useAppKitProvider } from '@reown/appkit/react';
@@ -14,6 +13,7 @@ import PoolInfo from '@/components/pool/PoolInfo';
 import ProgressTracking from '@/components/pool/ProgressTracking';
 import Donators from '@/components/pool/Donators';
 import DonatorCount from '@/components/pool/DonatorCount';
+import { PoolLogo } from '@/components/ui/pool-logo';
 
 // Tab types
 type TabType = 'info' | 'progress' | 'donators';
@@ -86,20 +86,14 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 relative">
-              {pool.logoUrl ? (
-                <Image
-                  src={pool.logoUrl}
-                  alt={pool.title}
-                  width={64}
-                  height={64}
-                  className="rounded-md"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center">
-                  <span className="text-gray-500 text-xl font-bold">{pool.title.charAt(0)}</span>
-                </div>
-              )}
+              <PoolLogo
+                logoUrl={pool.logoUrl}
+                title={pool.title}
+                width={64}
+                height={64}
+                className="rounded-md object-cover"
+                containerClassName="w-16 h-16"
+              />
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900">{pool.title}</h1>
@@ -122,13 +116,6 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
             </div>
             <div className="lg:w-96 mt-6 lg:mt-0">
               <FundingStats
-                status={pool.status}
-                currentAmount={pool.currentAmount}
-                targetAmount={pool.targetAmount}
-                percentageRaised={pool.percentageRaised}
-                investors={pool.investors}
-                largestInvestment={pool.largestInvestment}
-                daysLeft={pool.daysLeft}
                 poolId={pool.id}
                 onDonationSuccess={handleDonationSuccess}
               />
