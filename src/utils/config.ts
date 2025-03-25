@@ -1,1 +1,2 @@
-export const WALLETCONNECT_PROJECT_ID = "05d066d5e67c69d7f84c8bcc1e812bd5"; // Add your WalletConnect project ID here
+export const WALLETCONNECT_PROJECT_ID = "b5afe545e87787c53896449028cc2ad7";
+export const CONTRACT_ADDRESS = "0x76Db25A8aDd0bf31BAaC0661361f15E5aF5ff29e";
