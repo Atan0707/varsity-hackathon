@@ -13,6 +13,7 @@ import FundingStats from '@/components/pool/FundingStats';
 import PoolInfo from '@/components/pool/PoolInfo';
 import ProgressTracking from '@/components/pool/ProgressTracking';
 import Donators from '@/components/pool/Donators';
+import DonatorCount from '@/components/pool/DonatorCount';
 
 // Tab types
 type TabType = 'info' | 'progress' | 'donators';
@@ -166,9 +167,7 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
                 }`}
               >
                 Donators
-                <span className="ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">
-                  {pool.investors}
-                </span>
+                <DonatorCount poolId={pool.id} />
               </button>
             </nav>
           </div>
