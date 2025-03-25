@@ -397,7 +397,7 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
                 "name": "poolId",
                 "type": "uint256"
@@ -407,6 +407,18 @@
                 "internalType": "string",
                 "name": "location",
                 "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "itemCount",
+                "type": "uint256"
             }
         ],
         "name": "LocationUpdated",
@@ -727,6 +739,34 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getAllPools",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "ids",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "string[]",
+                "name": "names",
+                "type": "string[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "activeStatus",
+                "type": "bool[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "totalDonated",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",
@@ -779,6 +819,60 @@
                 "internalType": "bool",
                 "name": "delivered",
                 "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "lastUpdated",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPoolDetails",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalDonated",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalWithdrawn",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "active",
+                "type": "bool"
+            },
+            {
+                "internalType": "string[]",
+                "name": "checkpoints",
+                "type": "string[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "currentCheckpointIndex",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "checkpointReleaseStatus",
+                "type": "bool[]"
             }
         ],
         "stateMutability": "view",
@@ -837,6 +931,11 @@
                 "internalType": "bool[]",
                 "name": "deliveryStatuses",
                 "type": "bool[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "lastUpdatedTimes",
+                "type": "uint256[]"
             }
         ],
         "stateMutability": "view",
@@ -900,6 +999,11 @@
                 "internalType": "bool",
                 "name": "delivered",
                 "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "lastUpdated",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
