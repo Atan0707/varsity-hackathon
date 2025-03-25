@@ -118,15 +118,7 @@ export default function Navbar() {
             <Link href="/pool" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               Pool
             </Link>
-            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
-              Page 3
-            </Link>
-            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
-              Page 4
-            </Link>
-            <Link href="#" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
-              Page 5
-            </Link>
+           
           </div>
 
           {/* Center logo */}
