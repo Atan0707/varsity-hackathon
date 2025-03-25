@@ -112,20 +112,17 @@ export default function Navbar() {
             <Link href="/" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               Home
             </Link>
-            <Link href="/mintItem" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
-              Mint
-            </Link>
             <Link href="/pool" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               Pool
             </Link>
-           
+
           </div>
 
           {/* Center logo */}
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className="flex-shrink-0">
               <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
-                blockgiving
+                FUNDFI
               </span>
             </Link>
           </div>
@@ -135,7 +132,7 @@ export default function Navbar() {
             <Link href="/support" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               Support Center
             </Link>
-            
+
             {mounted && (
               <>
                 {isConnected && address ? (
@@ -161,7 +158,7 @@ export default function Navbar() {
                 )}
               </>
             )}
-            
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-[rgba(15,45,50,255)] hover:bg-[rgba(15,45,50,0.1)] focus:outline-none md:hidden"
@@ -225,13 +222,6 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
-              </Link>
-              <Link
-                href="/mintItem"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Mint
               </Link>
               <Link
                 href="/pool"

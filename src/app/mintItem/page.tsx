@@ -204,10 +204,10 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-8">
-            <div className="w-full max-w-md text-gray-100">
-                <h1 className="text-4xl font-bold text-center mb-8" style={{ color: 'rgba(15,45,50,255)' }}>
-                    NFT Minter & NFC Writer
+        <div className="flex flex-col items-center min-h-screen ">
+            <div className="w-full max-w-md">
+                <h1 className="text-4xl font-bold text-center mb-8 text-gray-600">
+                    Mint Items
                 </h1>
 
                 {!isNfcSupported && (
@@ -220,7 +220,7 @@ export default function Home() {
                 )}
 
                 {/* NFT Creation Form */}
-                <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl shadow-xl">
+                <div className="mb-8 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl shadow-xl">
                     <h2 className="text-xl font-semibold mb-6 text-white">
                         Create NFT
                     </h2>
@@ -235,7 +235,7 @@ export default function Home() {
                                 value={nftName}
                                 onChange={(e) => setNftName(e.target.value)}
                                 placeholder="T-shirt, Water bottle, etc."
-                                className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500"
+                                className="w-full p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
                             />
                         </div>
 
@@ -248,7 +248,7 @@ export default function Home() {
                                 value={nftImageURI}
                                 onChange={(e) => setNftImageURI(e.target.value)}
                                 placeholder="ipfs://... or https://..."
-                                className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500"
+                                className="w-full p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
                             />
                         </div>
 
@@ -261,7 +261,7 @@ export default function Home() {
                                 value={poolId}
                                 onChange={(e) => setPoolId(e.target.value)}
                                 placeholder="0"
-                                className="w-full p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500"
+                                className="w-full p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
                             />
                         </div>
 
@@ -275,22 +275,17 @@ export default function Home() {
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
                                     placeholder="Singapore"
-                                    className="flex-1 p-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500"
+                                    className="flex-1 p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
                                 />
                                 <button
                                     onClick={getCurrentLocation}
                                     disabled={isLoadingLocation}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                                        isLoadingLocation
-                                            ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                                            : "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90"
-                                    }`}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isLoadingLocation
+                                        ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                        : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                        }`}
                                 >
-                                    {isLoadingLocation ? (
-                                        <span>Loading...</span>
-                                    ) : (
-                                        <span>📍 Get Location</span>
-                                    )}
+                                    {isLoadingLocation ? "Loading..." : "📍"}
                                 </button>
                             </div>
                         </div>
@@ -298,11 +293,10 @@ export default function Home() {
                         <button
                             onClick={handleMint}
                             disabled={!nftName || !nftImageURI || !location}
-                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${
-                                !nftName || !nftImageURI || !location
-                                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                                    : "bg-gradient-to-r from-green-400 to-emerald-500 text-white hover:opacity-90"
-                            }`}
+                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${!nftName || !nftImageURI || !location
+                                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                }`}
                         >
                             Mint NFT
                         </button>
@@ -311,7 +305,7 @@ export default function Home() {
                             <div className="mt-3">
                                 <button
                                     onClick={() => getNftInfoFromTxHash(txHash)}
-                                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                    className="text-sm text-[#d9ff56] hover:text-[#d9ff56]/80 transition-colors duration-200"
                                 >
                                     View NFT Details
                                 </button>
@@ -322,11 +316,11 @@ export default function Home() {
 
                 {/* NFC Writer Section */}
                 {nftMinted && (
-                    <div className="mb-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        <h2 className="text-xl font-semibold mb-4" style={{ color: 'rgba(15,45,50,255)' }}>
+                    <div className="mb-6 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl">
+                        <h2 className="text-xl font-semibold mb-4 text-white">
                             Write NFT to NFC Tag
                         </h2>
-                        <p className="text-sm mb-4 text-gray-700 dark:text-gray-300">
+                        <p className="text-sm mb-4 text-gray-300">
                             Your NFT has been successfully minted! Now you can write the transaction
                             hash to an NFC tag to link it with the physical item.
                         </p>
@@ -334,11 +328,10 @@ export default function Home() {
                         <button
                             onClick={handleWrite}
                             disabled={writeStatus === "writing" || !message}
-                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${
-                                writeStatus === "writing"
-                                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                                    : "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90"
-                            }`}
+                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${writeStatus === "writing"
+                                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                }`}
                         >
                             {writeStatus === "writing" ? "Tap NFC Tag..." : "Write to NFC Tag"}
                         </button>
@@ -362,11 +355,11 @@ export default function Home() {
                 )}
 
                 {/* Instructions Section */}
-                <div className="mt-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                <div className="mt-6 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl">
                     <h2 className="text-xl font-semibold mb-4 text-white">
                         Instructions
                     </h2>
-                    <ol className="list-decimal list-inside text-sm space-y-2 text-white">
+                    <ol className="list-decimal list-inside text-sm space-y-2 text-gray-300">
                         <li>Fill in the NFT details and click "Mint NFT"</li>
                         <li>Wait for transaction to complete</li>
                         <li>Once minting is successful, the NFC writer section will appear</li>

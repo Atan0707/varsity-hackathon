@@ -237,7 +237,7 @@ export default function ScanItemsPage() {
         return (
             <div className="flex flex-col items-center min-h-screen p-8">
                 <div className="w-full max-w-md">
-                    <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg">
+                    <div className="p-4 bg-[#0c252a] text-[#d9ff56] rounded-lg border border-[#d9ff56]/20">
                         Please connect your wallet to continue.
                     </div>
                 </div>
@@ -248,8 +248,8 @@ export default function ScanItemsPage() {
     if (loading) {
         return (
             <div className="flex flex-col items-center min-h-screen p-8">
-                <div className="w-full max-w-md text-center">
-                    <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                <div className="w-full max-w-md text-center text-white">
+                    <div className="animate-spin h-8 w-8 border-4 border-[#d9ff56] border-t-transparent rounded-full mx-auto mb-2"></div>
                     Loading pool details...
                 </div>
             </div>
@@ -259,75 +259,85 @@ export default function ScanItemsPage() {
     return (
         <div className="flex flex-col items-center min-h-screen p-8">
             <div className="w-full max-w-md">
-                <h1 className="text-2xl font-bold text-center mb-2">
-                    {poolDetails?.name || `Pool ${poolId}`}
-                </h1>
+                {/* Main Container Box */}
+                <div className="mb-8 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl shadow-xl">
+                    <h1 className="text-2xl font-bold text-center mb-6 text-white">
+                        {poolDetails?.name || `Pool ${poolId}`}
+                    </h1>
 
-                <div className="mb-6">
-                    <p className="text-center text-gray-600">
-                        Scanned: {scannedItems.length} / {totalPoolItems} items
-                    </p>
-                    {poolDetails && (
-                        <div className="mt-2 p-3 bg-blue-400 rounded-lg">
-                            <p className="text-sm font-medium">Valid Checkpoints:</p>
-                            <p className="text-sm">{poolDetails.checkpoints.join(' → ')}</p>
+                    <div className="mb-6">
+                        <p className="text-center text-gray-300">
+                            Scanned: {scannedItems.length} / {totalPoolItems} items
+                        </p>
+                        {poolDetails && (
+                            <div className="mt-4 p-3 bg-[#0c252a] border border-[#d9ff56]/20 rounded-lg text-white">
+                                <p className="text-sm font-medium">Valid Checkpoints:</p>
+                                <p className="text-sm">{poolDetails.checkpoints.join(' → ')}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block mb-2 text-sm font-medium text-white">Next Location</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="Enter checkpoint location"
+                                className="flex-1 p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
+                            />
+                            <button
+                                onClick={getCurrentLocation}
+                                disabled={isLoadingLocation}
+                                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isLoadingLocation
+                                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                    : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                    }`}
+                            >
+                                {isLoadingLocation ? "Loading..." : "📌"}
+                            </button>
                         </div>
-                    )}
-                </div>
+                    </div>
 
-                <div className="mb-6">
-                    <label className="block mb-2">Next Location</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            placeholder="Enter checkpoint location"
-                            className="flex-1 p-2 border rounded"
-                        />
+                    <div className="space-y-4">
                         <button
-                            onClick={getCurrentLocation}
-                            disabled={isLoadingLocation}
-                            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+                            onClick={startScanning}
+                            disabled={isReading}
+                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${isReading
+                                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                }`}
                         >
-                            {isLoadingLocation ? "Loading..." : "📍"}
+                            {isReading ? "Scanning... (Tap NFC tags)" : "Start Scanning NFCs"}
+                        </button>
+
+                        <button
+                            onClick={updateLocations}
+                            disabled={scannedItems.length !== totalPoolItems || !location || updateStatus === 'updating'}
+                            className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${scannedItems.length !== totalPoolItems || !location || updateStatus === 'updating'
+                                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                }`}
+                        >
+                            {updateStatus === 'updating' ? 'Updating...' : 'Update Locations'}
                         </button>
                     </div>
                 </div>
 
-                <button
-                    onClick={startScanning}
-                    disabled={isReading}
-                    className="w-full p-3 mb-4 bg-blue-500 text-white rounded disabled:bg-gray-300"
-                >
-                    {isReading ? "Scanning... (Tap NFC tags)" : "Start Scanning NFCs"}
-                </button>
-
-                <button
-                    onClick={updateLocations}
-                    disabled={Boolean(
-                        scannedItems.length !== totalPoolItems ||
-                        !location ||
-                        updateStatus === 'updating' ||
-                        (poolDetails && !poolDetails.checkpoints.includes(location))
-                    )}
-                    className="w-full p-3 bg-green-500 text-white rounded disabled:bg-gray-300"
-                >
-                    {updateStatus === 'updating' ? 'Updating...' : 'Update Locations'}
-                </button>
-
+                {/* Scanned Items Section */}
                 {scannedItems.length > 0 && (
-                    <div className="mt-6">
-                        <h2 className="text-xl font-semibold mb-4">Scanned Items</h2>
+                    <div className="p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl shadow-xl">
+                        <h2 className="text-xl font-semibold mb-4 text-white">Scanned Items</h2>
                         <div className="space-y-2">
                             {scannedItems.map((item, index) => (
-                                <div key={index} className="p-3 bg-gray-100 rounded">
-                                    <p className="font-medium text-gray-600">{item.details?.name || `Item ${item.tokenId}`}</p>
-                                    <p className="text-sm text-gray-600">Token ID: {item.tokenId}</p>
-                                    <p className="text-sm text-gray-600">
+                                <div key={index} className="p-3 bg-white/5 border border-[#d9ff56]/20 rounded-lg">
+                                    <p className="font-medium text-white">{item.details?.name || `Item ${item.tokenId}`}</p>
+                                    <p className="text-sm text-gray-300">Token ID: {item.tokenId}</p>
+                                    <p className="text-sm text-gray-300">
                                         Current Location: {item.details?.currentLocation}
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="text-xs text-gray-400 mt-1">
                                         Tx: {item.txHash.slice(0, 10)}...
                                     </p>
                                 </div>

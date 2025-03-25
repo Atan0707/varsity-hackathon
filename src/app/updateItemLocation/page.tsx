@@ -52,33 +52,33 @@ export default function PoolsPage() {
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen p-8">
-            <div className="w-full max-w-md">
-                <h1 className="text-2xl font-bold text-center mb-6">
+        <div className="flex flex-col items-center min-h-screen p-8 bg-[rgb(256,252,228)]">
+            <div className="w-full max-w-7xl">
+                <h1 className="text-2xl md:text-3xl font-bold text-center mb-8 text-[#0c252a]">
                     Available Donation Pools
                 </h1>
 
                 {!isConnected && (
-                    <div className="p-4 mb-4 bg-yellow-50 text-yellow-800 rounded-lg">
+                    <div className="p-4 mb-4 bg-[#d9ff56]/10 text-[#0c252a] rounded-lg border border-[#d9ff56]/20">
                         Please connect your wallet to view pools.
                     </div>
                 )}
 
                 {error && (
-                    <div className="p-4 mb-4 bg-red-50 text-red-800 rounded-lg">
+                    <div className="p-4 mb-4 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20">
                         {error}
                     </div>
                 )}
 
                 {loading ? (
-                    <div className="text-center p-4">
-                        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <div className="text-center p-4 text-[#0c252a]">
+                        <div className="animate-spin h-8 w-8 border-4 border-[#d9ff56] border-t-transparent rounded-full mx-auto mb-2"></div>
                         Loading pools...
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {pools.length === 0 ? (
-                            <div className="text-center p-4 bg-blue-500 rounded-lg">
+                            <div className="text-center p-4 bg-white rounded-lg shadow-md text-[#0c252a]">
                                 No pools available.
                             </div>
                         ) : (
@@ -86,10 +86,23 @@ export default function PoolsPage() {
                                 <Link
                                     href={`/updateItemLocation/${pool.id}`}
                                     key={pool.id}
-                                    className="block p-4 bg-blue-500 shadow rounded-lg hover:shadow-md transition-shadow"
+                                    className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all"
                                 >
-                                    <h2 className="text-xl font-semibold">{pool.name}</h2>
-                                    <p className="text-gray-200">Pool ID: {pool.id}</p>
+                                    <div className="h-48 bg-gray-300 relative">
+                                        <img
+                                            src={`https://placehold.co/400x200/e9e9dc/0c252a?text=${encodeURIComponent(pool.name)}`}
+                                            alt={pool.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-bold text-[#0c252a] mb-2">
+                                            {pool.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            Pool ID: {pool.id}
+                                        </p>
+                                    </div>
                                 </Link>
                             ))
                         )}
