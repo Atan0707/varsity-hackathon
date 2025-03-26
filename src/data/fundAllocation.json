@@ -1,0 +1,29 @@
+{
+  "fundAllocations": [
+    {
+      "nftName": "T-Shirt Support ",
+      "percentage": 20,
+      "description": "Providing essential clothing support to those in need"
+    },
+    {
+      "nftName": "Drink Supply ",
+      "percentage": 15,
+      "description": "Ensuring access to clean and safe drinking supplies"
+    },
+    {
+      "nftName": "Med Kit ",
+      "percentage": 25,
+      "description": "Supporting medical and first aid supplies distribution"
+    },
+    {
+      "nftName": "Education Support ",
+      "percentage": 20,
+      "description": "Funding educational resources and learning materials"
+    },
+    {
+      "nftName": "Water Supply ",
+      "percentage": 20,
+      "description": "Supporting clean water infrastructure and distribution"
+    }
+  ]
+} 

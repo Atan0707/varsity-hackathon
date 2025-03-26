@@ -14,9 +14,10 @@ import ProgressTracking from '@/components/pool/ProgressTracking';
 import Donators from '@/components/pool/Donators';
 import DonatorCount from '@/components/pool/DonatorCount';
 import { PoolLogo } from '@/components/ui/pool-logo';
+import FundAllocation from '@/components/pool/FundAllocation';
 
 // Tab types
-type TabType = 'info' | 'progress' | 'donators';
+type TabType = 'info' | 'progress' | 'donators' | 'fundAllocation';
 
 export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
   const { id } = use(params);
@@ -156,6 +157,16 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
                 Donators
                 <DonatorCount poolId={pool.id} />
               </button>
+              <button 
+                onClick={() => setActiveTab('fundAllocation')}
+                className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'fundAllocation' 
+                    ? 'text-gray-900 border-gray-500' 
+                    : 'text-gray-500 hover:text-gray-700 border-transparent'
+                }`}
+              >
+                Fund Allocation
+              </button>
             </nav>
           </div>
 
@@ -176,6 +187,12 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
             {activeTab === 'donators' && (
               <div className="space-y-8">
                 <Donators pool={pool} />
+              </div>
+            )}
+            
+            {activeTab === 'fundAllocation' && (
+              <div className="space-y-8">
+                <FundAllocation pool={pool} />
               </div>
             )}
           </div>
