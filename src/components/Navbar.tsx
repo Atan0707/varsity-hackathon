@@ -154,7 +154,7 @@ export default function Navbar() {
           <div className="flex items-center space-x-4 md:space-x-6">
             <div className="hidden lg:block">
               <Link
-                href="/support"
+                href="/"
                 className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
                   ${pathname === "/support" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
               >
@@ -274,7 +274,7 @@ export default function Navbar() {
                   Mint
                 </Link>
                 <Link
-                  href="/support"
+                  href="/"
                   className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
