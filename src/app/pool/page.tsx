@@ -46,10 +46,16 @@ export default function PoolsListPage() {
           const targetAmount = 0.5;
           const percentageRaised = Math.min(Math.floor((pool.currentAmount / targetAmount) * 100), 100);
           
+          // Set daysLeft based on pool status - use pool.id to ensure consistent values
+          const daysLeft = pool.status === 'Live' 
+            ? (Number(pool.id) % 25) + 5 // 5 to 30 days based on pool ID
+            : 0;
+          
           return {
             ...pool,
             targetAmount,
             percentageRaised,
+            daysLeft,
             donors: 0 // Initialize donors count
           };
         });
