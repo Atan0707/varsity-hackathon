@@ -1,55 +1,121 @@
-# Varsity Hackathon
+# GlassFund
 
-A modern Next.js 15 template for building Web3 applications with wallet connection capabilities.
+GlassFund is a transparent charity funding platform built on the Scroll network that allows donors to track their donations through NFTs with NFC tags.
 
-## Features
+## Live Demo
 
-- **Next.js 15** with App Router and TurboPack
-- **Web3 Integration** with ethers.js and Reown AppKit
-- **Modern UI** with TailwindCSS and Framer Motion
-- **TypeScript** for type safety
+[https://glassfund.vercel.app/](https://glassfund.vercel.app/)
+
+## Overview
+
+GlassFund introduces a new model for charity donations where:
+
+1. **Donors** can:
+
+   - Choose specific donation pools (e.g., RM10 pools)
+   - Join ETH pools (collected monthly, RM50k per month)
+   - Pay using crypto or fiat (RM)
+   - Track their donations via smart contracts
+   - Receive funds in a staged release (30% at first stop, 70% after all NFT checkpoints)
+
+2. **Our Platform**:
+   - Purchases goods with pooled donations
+   - Creates NFTs representing these goods
+   - Embeds NFC tags and QR codes on physical items
+   - Ships items to locations in need (e.g., Palestine)
+   - Updates location data across 4 checkpoints
+   - Staff scan NFC tags to update the location of items
+   - Donors can track their donations in real-time
+
+## DAO Governance
+
+GlassFund incorporates DAO functionality that allows stakeholders to:
+
+- Create proposals for new donation pools or charity initiatives
+- Vote on existing proposals
+- Track proposal status and execution
+- Participate in community governance decisions
+
+## Technology Stack
+
+- **Frontend**: Next.js 15 with App Router
+- **Blockchain**: Deployed on Scroll Network (Ethereum L2)
+- **Smart Contracts**: Solidity (ERC-721 for NFTs, DAO contract for governance)
+- **Web3 Integration**: ethers.js and Reown AppKit
+- **UI**: TailwindCSS and Framer Motion
+- **Authentication**: Wallet-based authentication
+- **Physical Integration**: NFC tags + QR codes for item tracking
 
 ## Getting Started
 
-First, install the dependencies:
+### Prerequisites
+
+- Node.js (16+)
+- Yarn package manager
+- MetaMask or compatible wallet with Scroll Network configured
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-yarn 
+git clone https://github.com/yourusername/glassfund.git
+cd glassfund
 ```
 
-Then, run the development server:
+2. Install dependencies:
+
+```bash
+yarn
+```
+
+3. Run the development server:
 
 ```bash
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Using the Platform
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### For Donors
 
-## Ethereum Development (Using Ethers)
+1. **Connect Your Wallet**: Click on the "Connect Wallet" button and authorize your MetaMask or other compatible wallet. Make sure your wallet is configured to use the Scroll Network.
 
-You will need to import these first:
+2. **Choose a Donation Pool**: Browse available donation pools and select one that aligns with your interests.
 
-```bash
-import { ethers, Eip1193Provider } from "ethers";
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
-```
+3. **Make a Donation**: Choose between crypto or fiat payment options and complete your transaction.
 
-To interact with contract:
-```bash
+4. **Receive NFT Receipt**: After donation, you'll receive an NFT receipt representing your contribution.
 
-#  Get current user's wallet address
-const { address: currentUserAddress } = useAppKitAccount(); # optional
-const { walletProvider } = useAppKitProvider("eip155");
+5. **Track Your Impact**: Use the dashboard to track the journey of your donation through all checkpoints.
 
-const provider = new ethers.BrowserProvider(walletProvider as Eip1193Provider);
-const signer = await provider.getSigner();
-const contract = new ethers.Contract(Contract_Address, Contract_ABI, signer);
+### For Governance Participants
 
-# Example usage
-const getId = await contract.getId();
-console.log(getId)
-```
+1. **Access DAO Portal**: Navigate to the DAO section of the platform.
+
+2. **View Proposals**: Browse existing proposals and their current status.
+
+3. **Create Proposals**: Submit new proposals for community consideration.
+
+4. **Cast Votes**: Participate in governance by voting on active proposals.
+
+5. **Monitor Execution**: Track the implementation of successful proposals.
+
+## Checkpoints System
+
+Our unique 4-checkpoint system ensures complete transparency:
+
+1. **First Stop (Singapore)**: Initial processing and preparation
+2. **Transit Point 1**: International shipping milestone
+3. **Transit Point 2**: Regional distribution center
+4. **Final Destination**: Delivery to those in need
+
+At each checkpoint, our staff scan the NFC tags embedded in the donated goods, updating the blockchain record and allowing donors to track their contributions in real-time.
+
+## Contract Addresses (Scroll Network)
+
+- Donation Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
+- DAO Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
+- NFT Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
