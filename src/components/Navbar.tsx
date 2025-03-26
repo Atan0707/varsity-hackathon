@@ -120,6 +120,9 @@ export default function Navbar() {
             <Link href="/dao" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               DAO
             </Link>
+            <Link href="/mintItem" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              Mint
+            </Link>
           </div>
 
           {/* Center logo */}
