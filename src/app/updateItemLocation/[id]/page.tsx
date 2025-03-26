@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
@@ -140,7 +141,7 @@ export default function ScanItemsPage() {
             const ndef = new NDEFReader();
             await ndef.scan();
 
-            ndef.addEventListener("reading", async ({ message }: any) => {
+            ndef.addEventListener("reading", async ({ message }: { message: { records: { data: Uint8Array }[] } }) => {
                 const txHash = new TextDecoder().decode(message.records[0].data);
 
                 try {

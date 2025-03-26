@@ -56,7 +56,9 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
   });
 
   // Get the donations array from the response
-  const donations = data?.donationReceiveds || [];
+  const donations = React.useMemo(() => {
+    return data?.donationReceiveds || [];
+  }, [data?.donationReceiveds]);
 
   // Calculate the unique donator count by filtering unique donor addresses
   const uniqueDonators = React.useMemo(() => {

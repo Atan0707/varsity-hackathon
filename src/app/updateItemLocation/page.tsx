@@ -9,7 +9,7 @@ import ABI from "../../contract/abi.json";
 import Link from "next/link";
 
 export default function PoolsPage() {
-    const { address, isConnected } = useAppKitAccount();
+    const { isConnected } = useAppKitAccount();
     const { walletProvider } = useAppKitProvider("eip155");
     const [pools, setPools] = useState<{ id: number; name: string }[]>([]);
     const [loading, setLoading] = useState(true);

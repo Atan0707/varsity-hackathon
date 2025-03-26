@@ -1,6 +1,8 @@
 "use client";
 
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import { 
+    // useAppKitAccount, 
+    useAppKitProvider } from "@reown/appkit/react";
 import { Eip1193Provider } from "ethers";
 import { ethers } from "ethers";
 import { useState } from "react";
@@ -22,7 +24,7 @@ interface GeolocationPositionExtended {
 }
 
 export default function Home() {
-    const { address, isConnected } = useAppKitAccount();
+    // const { address, isConnected } = useAppKitAccount();
     const { walletProvider } = useAppKitProvider("eip155")
     const [message, setMessage] = useState("");
     const [writeStatus, setWriteStatus] = useState<
@@ -191,6 +193,7 @@ export default function Home() {
                     }
                 } catch (e) {
                     // Not our event, continue to next log
+                    console.log(e)
                     continue;
                 }
             }
@@ -360,10 +363,10 @@ export default function Home() {
                         Instructions
                     </h2>
                     <ol className="list-decimal list-inside text-sm space-y-2 text-gray-300">
-                        <li>Fill in the NFT details and click "Mint NFT"</li>
+                        <li>Fill in the NFT details and click &quot;Mint NFT&quot;</li>
                         <li>Wait for transaction to complete</li>
                         <li>Once minting is successful, the NFC writer section will appear</li>
-                        <li>Click "Write to NFC Tag" to save the transaction hash to the NFC tag</li>
+                        <li>Click &quot;Write to NFC Tag&quot; to save the transaction hash to the NFC tag</li>
                         <li>Hold your NFC tag close to the back of your device</li>
                     </ol>
                 </div>

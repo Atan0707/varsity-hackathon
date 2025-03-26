@@ -12,6 +12,7 @@ export default function Navbar() {
   const { address, isConnected } = useAppKitAccount();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
@@ -97,6 +98,7 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   // Update the isActive function to use pathname directly
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
