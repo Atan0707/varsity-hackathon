@@ -12,19 +12,18 @@ GlassFund introduces a new model for charity donations where:
 
 1. **Donors** can:
 
-   - Choose specific donation pools (e.g., RM10 pools)
-   - Join ETH pools (collected monthly, RM50k per month)
+   - Choose specific donation pools (e.g., Aman Palestine)
    - Pay using crypto or fiat (RM)
    - Track their donations via smart contracts
-   - Receive funds in a staged release (30% at first stop, 70% after all NFT checkpoints)
+   - The funds will be staged release to the company (30% at first stop, 70% after all NFT checkpoints)
 
 2. **Our Platform**:
    - Purchases goods with pooled donations
    - Creates NFTs representing these goods
-   - Embeds NFC tags and QR codes on physical items
+   - Embeds NFC stickers and QR codes on physical items
    - Ships items to locations in need (e.g., Palestine)
-   - Updates location data across 4 checkpoints
-   - Staff scan NFC tags to update the location of items
+   - Updates location data across defined checkpoints
+   - Staff scan NFC stickers to update the location of items
    - Donors can track their donations in real-time
 
 ## DAO Governance
