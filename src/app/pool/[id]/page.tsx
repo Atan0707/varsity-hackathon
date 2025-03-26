@@ -1,26 +1,67 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import { getPoolById } from '@/utils/poolData';
+import { getPoolByIdFromChain } from '@/utils/contract';
+import { Pool } from '@/utils/poolData';
+import { useAppKitProvider } from '@reown/appkit/react';
 import Badge from '@/components/Badge';
 import CategoryTag from '@/components/CategoryTag';
 import VideoPlayer from '@/components/VideoPlayer';
-import FundingStats from '@/components/FundingStats';
+import FundingStats from '@/components/pool/FundingStats';
 import PoolInfo from '@/components/pool/PoolInfo';
 import ProgressTracking from '@/components/pool/ProgressTracking';
 import Donators from '@/components/pool/Donators';
-
-
+import DonatorCount from '@/components/pool/DonatorCount';
+import { PoolLogo } from '@/components/ui/pool-logo';
 
 // Tab types
 type TabType = 'info' | 'progress' | 'donators';
 
 export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
   const { id } = use(params);
-  const pool = getPoolById(id);
-  const [activeTab, setActiveTab] = useState<TabType>('donators');
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabType>('info');
+  const { walletProvider } = useAppKitProvider("eip155");
+
+  const fetchPool = async () => {
+    try {
+      setLoading(true);
+      const poolData = await getPoolByIdFromChain(id, walletProvider);
+      if (poolData) {
+        setPool(poolData);
+      } else {
+        // If pool is not found, this will trigger a 404 page
+        notFound();
+      }
+    } catch (error) {
+      console.error('Error fetching pool:', error);
+      notFound();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPool();
+  }, [id, walletProvider]);
+
+  const handleDonationSuccess = () => {
+    // Refresh pool data after a donation is made
+    fetchPool();
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-lg text-gray-600">Loading pool data...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!pool) {
     notFound();
@@ -45,20 +86,14 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 relative">
-              {pool.logoUrl ? (
-                <Image
-                  src={pool.logoUrl}
-                  alt={pool.title}
-                  width={64}
-                  height={64}
-                  className="rounded-md"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div className="w-16 h-16 bg-gray-200 rounded-md flex items-center justify-center">
-                  <span className="text-gray-500 text-xl font-bold">{pool.title.charAt(0)}</span>
-                </div>
-              )}
+              <PoolLogo
+                logoUrl={pool.logoUrl}
+                title={pool.title}
+                width={64}
+                height={64}
+                className="rounded-md object-cover"
+                containerClassName="w-16 h-16"
+              />
             </div>
             <div>
               <h1 className="text-4xl font-bold text-gray-900">{pool.title}</h1>
@@ -81,13 +116,8 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
             </div>
             <div className="lg:w-96 mt-6 lg:mt-0">
               <FundingStats
-                status={pool.status}
-                currentAmount={pool.currentAmount}
-                targetAmount={pool.targetAmount}
-                percentageRaised={pool.percentageRaised}
-                investors={pool.investors}
-                largestInvestment={pool.largestInvestment}
-                daysLeft={pool.daysLeft}
+                poolId={pool.id}
+                onDonationSuccess={handleDonationSuccess}
               />
             </div>
           </div>
@@ -124,9 +154,7 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
                 }`}
               >
                 Donators
-                <span className="ml-2 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">
-                  {pool.investors}
-                </span>
+                <DonatorCount poolId={pool.id} />
               </button>
             </nav>
           </div>

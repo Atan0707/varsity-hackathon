@@ -27,6 +27,7 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
         uint256 poolId;
         string currentLocation;
         bool delivered;
+        uint256 lastUpdated; // Timestamp of the last location update
     }
 
     mapping(uint256 => DonationPool) public donationPools;
@@ -41,7 +42,12 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
     event PoolCreated(uint256 poolId, string name);
     event DonationReceived(address donor, uint256 poolId, uint256 amount);
     event ItemCreated(uint256 tokenId, string name, uint256 poolId);
-    event LocationUpdated(uint256 poolId, string location);
+    event LocationUpdated(
+        uint256 indexed poolId,
+        string location,
+        uint256 timestamp,
+        uint256 itemCount
+    );
     event FundsReleased(uint256 poolId, uint256 amount, string checkpoint);
 
     // First release 30%, final release 70%
@@ -100,13 +106,14 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         _mint(msg.sender, newItemId);
 
-        // Set the item data
+        // Set the item data with timestamp
         items[newItemId] = Item({
             name: name,
             imageURI: imageURI,
             poolId: poolId,
             currentLocation: initialLocation,
-            delivered: false
+            delivered: false,
+            lastUpdated: block.timestamp
         });
 
         // Add this item to the pool's items
@@ -143,10 +150,14 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             "Location is not a valid checkpoint"
         );
 
-        // Update location for all items in the pool
+        // Current timestamp for all updates
+        uint256 currentTime = block.timestamp;
+
+        // Update location and timestamp for all items in the pool
         uint256[] memory itemsInPool = poolToItems[poolId];
         for (uint i = 0; i < itemsInPool.length; i++) {
             items[itemsInPool[i]].currentLocation = newLocation;
+            items[itemsInPool[i]].lastUpdated = currentTime;
 
             // If it's the final checkpoint, mark as delivered
             if (checkpointIndex == pool.checkpoints.length - 1) {
@@ -154,23 +165,17 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             }
         }
 
-        // If this is a new checkpoint (moving forward), release funds
-        if (
-            checkpointIndex > pool.currentCheckpointIndex &&
-            !pool.checkpointReleased[checkpointIndex]
-        ) {
+        if (!pool.checkpointReleased[checkpointIndex]) {
             pool.currentCheckpointIndex = checkpointIndex;
             pool.checkpointReleased[checkpointIndex] = true;
 
             uint256 amountToRelease;
 
             if (checkpointIndex == 0) {
-                // First checkpoint - release 30%
                 amountToRelease =
                     (pool.totalDonated * FIRST_RELEASE_PERCENT) /
                     100;
             } else if (checkpointIndex == pool.checkpoints.length - 1) {
-                // Final checkpoint - release remaining 70%
                 amountToRelease =
                     (pool.totalDonated * FINAL_RELEASE_PERCENT) /
                     100;
@@ -189,7 +194,13 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             }
         }
 
-        emit LocationUpdated(poolId, newLocation);
+        // Enhanced event with timestamp and item count information
+        emit LocationUpdated(
+            poolId,
+            newLocation,
+            currentTime,
+            itemsInPool.length
+        );
     }
 
     // Get items for a pool
@@ -210,7 +221,8 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             string memory imageURI,
             uint256 poolId,
             string memory currentLocation,
-            bool delivered
+            bool delivered,
+            uint256 lastUpdated
         )
     {
         Item memory item = items[tokenId];
@@ -219,7 +231,8 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             item.imageURI,
             item.poolId,
             item.currentLocation,
-            item.delivered
+            item.delivered,
+            item.lastUpdated
         );
     }
 
@@ -251,7 +264,8 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             string[] memory names,
             string[] memory imageURIs,
             string[] memory locations,
-            bool[] memory deliveryStatuses
+            bool[] memory deliveryStatuses,
+            uint256[] memory lastUpdatedTimes
         )
     {
         uint256[] memory itemIds = poolToItems[poolId];
@@ -261,6 +275,7 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
         imageURIs = new string[](itemCount);
         locations = new string[](itemCount);
         deliveryStatuses = new bool[](itemCount);
+        lastUpdatedTimes = new uint256[](itemCount);
 
         for (uint256 i = 0; i < itemCount; i++) {
             Item memory item = items[itemIds[i]];
@@ -268,8 +283,78 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
             imageURIs[i] = item.imageURI;
             locations[i] = item.currentLocation;
             deliveryStatuses[i] = item.delivered;
+            lastUpdatedTimes[i] = item.lastUpdated;
         }
 
-        return (itemIds, names, imageURIs, locations, deliveryStatuses);
+        return (
+            itemIds,
+            names,
+            imageURIs,
+            locations,
+            deliveryStatuses,
+            lastUpdatedTimes
+        );
+    }
+
+    // Get pool details
+    function getPoolDetails(
+        uint256 poolId
+    )
+        external
+        view
+        returns (
+            string memory name,
+            uint256 totalDonated,
+            uint256 totalWithdrawn,
+            bool active,
+            string[] memory checkpoints,
+            uint256 currentCheckpointIndex,
+            bool[] memory checkpointReleaseStatus
+        )
+    {
+        require(poolId < poolCount, "Pool does not exist");
+        DonationPool storage pool = donationPools[poolId];
+
+        // Create array for checkpoint release status
+        bool[] memory releaseStatus = new bool[](pool.checkpoints.length);
+        for (uint i = 0; i < pool.checkpoints.length; i++) {
+            releaseStatus[i] = pool.checkpointReleased[i];
+        }
+
+        return (
+            pool.name,
+            pool.totalDonated,
+            pool.totalWithdrawn,
+            pool.active,
+            pool.checkpoints,
+            pool.currentCheckpointIndex,
+            releaseStatus
+        );
+    }
+
+    // Get all pools
+    function getAllPools()
+        external
+        view
+        returns (
+            uint256[] memory ids,
+            string[] memory names,
+            bool[] memory activeStatus,
+            uint256[] memory totalDonated
+        )
+    {
+        ids = new uint256[](poolCount);
+        names = new string[](poolCount);
+        activeStatus = new bool[](poolCount);
+        totalDonated = new uint256[](poolCount);
+
+        for (uint256 i = 0; i < poolCount; i++) {
+            ids[i] = i;
+            names[i] = donationPools[i].name;
+            activeStatus[i] = donationPools[i].active;
+            totalDonated[i] = donationPools[i].totalDonated;
+        }
+
+        return (ids, names, activeStatus, totalDonated);
     }
 }

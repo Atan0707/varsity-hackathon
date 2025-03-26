@@ -206,8 +206,8 @@ export default function Home() {
                     <button
                         onClick={() => setActiveTab('read')}
                         className={`flex-1 p-3 font-medium ${activeTab === 'read'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         Read NFC
@@ -215,8 +215,8 @@ export default function Home() {
                     <button
                         onClick={() => setActiveTab('write')}
                         className={`flex-1 p-3 font-medium ${activeTab === 'write'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         Write NFC
@@ -238,8 +238,8 @@ export default function Home() {
                                 onClick={startReading}
                                 disabled={!isNfcSupported}
                                 className={`w-full p-3 mb-6 rounded-lg font-medium ${!isNfcSupported
-                                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
                                     }`}
                             >
                                 Start Reading NFC Tags
@@ -333,8 +333,8 @@ export default function Home() {
                             onClick={handleWrite}
                             disabled={writeStatus === 'writing' || !message}
                             className={`w-full p-3 rounded-lg font-medium ${writeStatus === 'writing' || !message
-                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
                                 }`}
                         >
                             {writeStatus === 'writing' ? 'Tap NFC Tag...' : 'Write to NFC Tag'}
