@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, use, useEffect } from 'react';
+import React, { useState, use, useEffect, useCallback } from 'react';
 import { notFound } from 'next/navigation';
 import { getPoolByIdFromChain } from '@/utils/contract';
 import { Pool } from '@/utils/poolData';
@@ -26,7 +26,7 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const { walletProvider } = useAppKitProvider("eip155");
 
-  const fetchPool = async () => {
+  const fetchPool = useCallback(async () => {
     try {
       setLoading(true);
       const poolData = await getPoolByIdFromChain(id, walletProvider);
@@ -42,11 +42,11 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, walletProvider]);
 
   useEffect(() => {
     fetchPool();
-  }, [id, walletProvider]);
+  }, [id, walletProvider, fetchPool]);
 
   const handleDonationSuccess = () => {
     // Refresh pool data after a donation is made
@@ -192,7 +192,7 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
             
             {activeTab === 'fundAllocation' && (
               <div className="space-y-8">
-                <FundAllocation pool={pool} />
+                <FundAllocation />
               </div>
             )}
           </div>

@@ -1,13 +1,8 @@
 import React from 'react';
-import { Pool } from '@/utils/poolData';
 import { getFundAllocations } from '@/utils/fundAllocation';
 import type { FundAllocation } from '@/utils/fundAllocation';
 
-interface FundAllocationProps {
-  pool: Pool;
-}
-
-export default function FundAllocation({ pool }: FundAllocationProps) {
+export default function FundAllocation() {
   const allocations = getFundAllocations();
 
   return (
