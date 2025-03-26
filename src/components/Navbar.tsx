@@ -117,14 +117,16 @@ export default function Navbar() {
             <Link href="/pool" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
               Pool
             </Link>
-
+            <Link href="/dao" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+              DAO
+            </Link>
           </div>
 
           {/* Center logo */}
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className="flex-shrink-0">
               <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
-                FUNDFI
+                GlassFund
               </span>
             </Link>
           </div>
@@ -231,6 +233,13 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pool
+              </Link>
+              <Link
+                href="/dao"
+                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                DAO
               </Link>
               <Link
                 href="#"

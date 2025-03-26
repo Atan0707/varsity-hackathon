@@ -91,7 +91,7 @@ export default function Home() {
         <div className="container mx-auto px-6 py-24 md:py-32 relative z-10">
           <div className="flex flex-col items-center justify-center text-center">
             <h1 className="text-4xl md:text-7xl font-bold text-white mb-8">
-              Transparent Giving
+              GlassFund
             </h1>
             <p className="text-lg md:text-2xl text-white mb-12 max-w-3xl">
               Track donations, trust the process
@@ -202,7 +202,7 @@ export default function Home() {
                 href="/pool" 
                 className="px-8 py-4 bg-[#d9ff56] text-[#0c252a] font-medium rounded-full hover:bg-opacity-90 transition"
               >
-                Discover Fundraisers
+                Discover GlassFund
               </Link>
             </div>
           </div>
