@@ -105,43 +105,65 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`w-full py-4 bg-[rgb(256,252,228)] z-20 shadow-sm`}
+      className={`w-full py-2 md:py-4 bg-[rgb(256,252,228)] z-20 fixed top-0 border-b border-[rgba(15,45,50,0.1)]`}
     >
-      <div className="container mx-auto px-6">
-        <div className="flex justify-between items-center">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="flex justify-between items-center h-14 md:h-16">
           {/* Left side navigation */}
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+          <div className="hidden lg:flex items-center space-x-8">
+            <Link
+              href="/"
+              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                ${pathname === "/" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+            >
               Home
             </Link>
-            <Link href="/pool" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+            <Link
+              href="/pool"
+              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                ${pathname === "/pool" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+            >
               Pool
             </Link>
-            <Link href="/dao" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+            <Link
+              href="/dao"
+              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                ${pathname === "/dao" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+            >
               DAO
             </Link>
-            <Link href="/mintItem" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
+            <Link
+              href="/mintItem"
+              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                ${pathname === "/mintItem" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+            >
               Mint
             </Link>
           </div>
 
           {/* Center logo */}
-          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-            <Link href="/" className="flex-shrink-0">
-              <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
+          <div className="flex lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2">
+            <Link href="/" className="flex-shrink-0 group">
+              <span className="text-xl md:text-2xl font-bold text-[rgba(15,45,50,255)] group-hover:text-[rgba(15,45,50,0.8)] transition-colors">
                 GlassFund
               </span>
             </Link>
           </div>
 
           {/* Right side links/buttons */}
-          <div className="flex items-center space-x-6">
-            <Link href="/support" className="text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium">
-              Support Center
-            </Link>
+          <div className="flex items-center space-x-4 md:space-x-6">
+            <div className="hidden lg:block">
+              <Link
+                href="/support"
+                className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                  ${pathname === "/support" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+              >
+                Support Center
+              </Link>
+            </div>
 
             {mounted && (
-              <>
+              <div className="hidden lg:block">
                 {isConnected && address ? (
                   <button
                     onClick={() => {
@@ -151,24 +173,28 @@ export default function Navbar() {
                         icon: "👤",
                       });
                     }}
-                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
+                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded-lg 
+                      hover:bg-[rgba(15,45,50,0.1)] font-medium transition-colors"
                   >
                     {formatAddress(address)}
                   </button>
                 ) : (
                   <button
                     onClick={handleConnectClick}
-                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
+                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded-lg 
+                      hover:bg-[rgba(15,45,50,0.1)] font-medium transition-colors"
                   >
                     Connect
                   </button>
                 )}
-              </>
+              </div>
             )}
 
+            {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-[rgba(15,45,50,255)] hover:bg-[rgba(15,45,50,0.1)] focus:outline-none md:hidden"
+              className="inline-flex items-center justify-center p-2 rounded-md text-[rgba(15,45,50,255)] 
+                hover:bg-[rgba(15,45,50,0.1)] focus:outline-none lg:hidden transition-colors"
               aria-expanded={mobileMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
@@ -207,79 +233,69 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu - kept for mobile functionality */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            className="md:hidden overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            className="fixed inset-0 top-[57px] bg-[rgb(256,252,228)] z-50 md:hidden"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="px-4 pt-2 pb-3 space-y-3 bg-[rgb(256,252,228)] shadow-lg">
-              <div className="flex justify-center pb-4 mb-2 border-b border-[rgba(15,45,50,0.1)]">
-                <span className="text-xl font-bold text-[rgba(15,45,50,255)]">
-                  blockgiving
-                </span>
-              </div>
-              <Link
-                href="/"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                href="/pool"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pool
-              </Link>
-              <Link
-                href="/dao"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                DAO
-              </Link>
-              <Link
-                href="#"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Page 3
-              </Link>
-              <Link
-                href="#"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Page 4
-              </Link>
-              <Link
-                href="#"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Page 5
-              </Link>
-              <Link
-                href="#"
-                className="block px-3 py-2 text-[rgba(15,45,50,255)] font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Support Center
-              </Link>
-              {!isConnected && (
-                <button
-                  onClick={handleConnectClick}
-                  className="w-full mt-2 px-4 py-2 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded hover:bg-[rgba(15,45,50,0.1)] font-medium"
+            <div className="flex flex-col h-full px-4 pt-4 pb-20 overflow-y-auto">
+              <div className="space-y-4">
+                <Link
+                  href="/"
+                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Connect
-                </button>
-              )}
+                  Home
+                </Link>
+                <Link
+                  href="/pool"
+                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pool
+                </Link>
+                <Link
+                  href="/dao"
+                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  DAO
+                </Link>
+                <Link
+                  href="/mintItem"
+                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Mint
+                </Link>
+                <Link
+                  href="/support"
+                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Support Center
+                </Link>
+              </div>
+
+              {/* Mobile Connect Button */}
+              <div className="mt-8 px-4">
+                {mounted && !isConnected && (
+                  <button
+                    onClick={() => {
+                      handleConnectClick();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full py-3 text-[rgba(15,45,50,255)] border-2 border-[rgba(15,45,50,255)] rounded-lg hover:bg-[rgba(15,45,50,0.1)] font-medium text-lg"
+                  >
+                    Connect Wallet
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
