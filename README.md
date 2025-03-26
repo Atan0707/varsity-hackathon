@@ -35,6 +35,32 @@ GlassFund incorporates DAO functionality that allows stakeholders to:
 - Track proposal status and execution
 - Participate in community governance decisions
 
+## Front-End View
+
+### GlassFund Landing Page
+![image](https://github.com/user-attachments/assets/2088bee5-6dfa-4eb6-b085-cd831de4bb2b)
+
+
+### GlassFund DAO
+![image](https://github.com/user-attachments/assets/c2bb7975-d23b-432c-97aa-d125ec1bc1eb)
+
+### Current crowdfund pool - Everything is on-chain
+![image](https://github.com/user-attachments/assets/02793147-1995-4a64-bb18-f39e863f03e4)
+
+
+### Crowdfund pool page - Users can donate their money here
+![image](https://github.com/user-attachments/assets/ed3a9d80-275f-46b3-b11c-efdfb4b6b3ac)
+
+
+### User can view the crowdfund progress
+![image](https://github.com/user-attachments/assets/4a8477f4-2342-4c32-98cb-4adcf5d0db37)
+
+
+### All donators will be listed here
+![image](https://github.com/user-attachments/assets/961e4362-8f59-4622-8bee-5a36f38c0311)
+
+
+
 ## Technology Stack
 
 - **Frontend**: Next.js 15 with App Router
@@ -44,6 +70,15 @@ GlassFund incorporates DAO functionality that allows stakeholders to:
 - **UI**: TailwindCSS and Framer Motion
 - **Authentication**: Wallet-based authentication
 - **Physical Integration**: NFC tags + QR codes for item tracking
+
+## Project Architecture
+
+![image](https://github.com/user-attachments/assets/f6fa8a08-fe1d-4a04-8cfd-47b39d2dc4b0)
+
+- Donated money will be locked into smart contract
+- Item purchased for the crowdfund will be converted into NFT for tracking
+- Item location will be updated and stored into NFT metadata.
+- Once item have been delivered to the assigned destination, the fund will be released from smart contract.
 
 ## Getting Started
 
@@ -115,6 +150,9 @@ At each checkpoint, our staff scan the NFC tags embedded in the donated goods, u
 
 ## Contract Addresses (Scroll Network)
 
-- Donation Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
-- DAO Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
-- NFT Contract: `0x41851a430DB01124Ff7379cB5a890c9bd4785e04`
+- Donation Contract: [`0x41851a430DB01124Ff7379cB5a890c9bd4785e04`](https://sepolia.scrollscan.com/address/0x41851a430db01124ff7379cb5a890c9bd4785e04)
+
+## Future Implementation
+
+- Add governance token for donators, which allows them to participate in DAO
+- QR Code with NFC for tracking system
