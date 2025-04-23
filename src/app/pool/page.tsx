@@ -39,17 +39,16 @@ export default function PoolsListPage() {
       try {
         setLoading(true);
         const poolsData = await getAllPoolsFromChain();
+        console.log(poolsData);
         
         // Update target amounts and percentageRaised for each pool
         const poolsWithTargets = poolsData.map(pool => {
           // For demonstration, set target to be 1.5x current amount if not provided
-          const targetAmount = 0.5;
+          const targetAmount = pool.targetAmount;
           const percentageRaised = Math.min(Math.floor((pool.currentAmount / targetAmount) * 100), 100);
           
           // Set daysLeft based on pool status - use pool.id to ensure consistent values
-          const daysLeft = pool.status === 'Live' 
-            ? (Number(pool.id) % 25) + 5 // 5 to 30 days based on pool ID
-            : 0;
+          const daysLeft = pool.daysLeft;
           
           return {
             ...pool,

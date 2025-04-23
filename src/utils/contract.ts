@@ -1,4 +1,4 @@
-import { ethers, Eip1193Provider, Contract } from 'ethers';
+import { ethers, Eip1193Provider, Contract, Wallet } from 'ethers';
 import contractABI from '@/contract/abi.json';
 import { Pool } from './poolData';
 import { CONTRACT_ADDRESS } from './config';
@@ -6,6 +6,12 @@ import { CONTRACT_ADDRESS } from './config';
 
 export const getContract = async (walletProvider: unknown): Promise<Contract> => {
   try {
+    // If walletProvider is already a Wallet (from private key), use it directly
+    if (walletProvider instanceof Wallet) {
+      return new ethers.Contract(CONTRACT_ADDRESS, contractABI, walletProvider);
+    }
+    
+    // Otherwise, assume it's an EIP-1193 provider
     const provider = new ethers.BrowserProvider(walletProvider as Eip1193Provider);
     const signer = await provider.getSigner();
     return new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
@@ -29,47 +35,51 @@ export const getReadOnlyContract = (): Contract => {
 export const getAllPoolsFromChain = async (): Promise<Pool[]> => {
   try {
     const contract = getReadOnlyContract();
-    const [ids, names, activeStatus, totalDonated] = await contract.getAllPools();
+    const [ids, names, descriptions, imageURIs, targetAmounts, endDates, activeStatus, totalDonated] = await contract.getAllPools();
+    
+    // Current timestamp in seconds
+    const currentTimestamp = Math.floor(Date.now() / 1000);
     
     // Create pool objects from blockchain data
     const pools = ids.map((id: bigint, index: number) => {
       const poolId = Number(id);
       const totalAmount = Number(totalDonated[index]);
+      const targetAmount = Number(targetAmounts[index]);
+      const endDateTimestamp = Number(endDates[index]);
+      
+      // Calculate days left
+      const secondsLeft = Math.max(0, endDateTimestamp - currentTimestamp);
+      const daysLeft = Math.ceil(secondsLeft / (60 * 60 * 24));
+      
+      // Calculate percentage raised
+      const percentageRaised = targetAmount > 0 
+        ? Math.min(Math.floor((totalAmount / targetAmount) * 100), 100) 
+        : 0;
+      
+      // Convert amounts from wei to ETH for display
+      const totalAmountEth = totalAmount / 1e18;
+      const targetAmountEth = targetAmount / 1e18;
       
       return {
         id: poolId.toString(),
         title: names[index],
-        tagline: '', // This isn't stored in the contract
-        categories: [], // These aren't stored in the contract
-        badges: [], // These aren't stored in the contract
-        videoUrl: '', // This isn't stored in the contract
+        tagline: `${names[index]} Crowdfunding Pool`,
+        categories: ['CROWDFUNDING'],
+        badges: activeStatus[index] ? ['ACTIVE'] : ['INACTIVE'],
+        videoUrl: '', // Will be fetched in detail view
         status: activeStatus[index] ? 'Live' : 'Closed',
-        currentAmount: totalAmount / 1e18, // Convert from wei to ether
-        targetAmount: 0, // Not directly available from the contract
-        percentageRaised: 0, // Will be calculated once we have target amount
-        donors: 0, // Will be fetched separately
-        largestInvestment: 0, // Not directly available from the contract
-        daysLeft: 0, // Not directly available from the contract
-        logoUrl: '', // Will be fetched separately
-        description: '', // This isn't stored in the contract
+        currentAmount: totalAmountEth,
+        targetAmount: targetAmountEth,
+        percentageRaised: percentageRaised,
+        donors: 0, // Will be fetched in detail view
+        largestInvestment: 0, // Will be fetched in detail view
+        daysLeft: daysLeft,
+        logoUrl: imageURIs[index] || '/logos/habibi.jpg', // Use blockchain URI
+        description: descriptions[index],
       };
     });
     
-    // Fetch logo URIs for each pool
-    const poolsWithLogos = await Promise.all(pools.map(async (pool: Pool) => {
-      try {
-        const logoURI = await getPoolLogoURI(Number(pool.id));
-        return {
-          ...pool,
-          logoUrl: logoURI || '/logos/habibi.jpg', // Use blockchain URI if available, else use placeholder
-        };
-      } catch (error) {
-        console.error(`Error fetching logo for pool ${pool.id}:`, error);
-        return pool;
-      }
-    }));
-    
-    return poolsWithLogos;
+    return pools;
   } catch (error) {
     console.error('Error getting pools from chain:', error);
     return [];
@@ -79,15 +89,9 @@ export const getAllPoolsFromChain = async (): Promise<Pool[]> => {
 export const getPoolLogoURI = async (poolId: number): Promise<string | undefined> => {
   try {
     const contract = getReadOnlyContract();
-    // Get items from the pool - destructure only what we need
-    const [, , imageURIs] = await contract.getPoolItemsWithDetails(poolId);
-    
-    // Return the first item's image URI if it exists
-    if (imageURIs && imageURIs.length > 0) {
-      return imageURIs[0];
-    }
-    
-    return undefined;
+    // Get pool details
+    const [, , imageURI] = await contract.getPoolDetails(poolId);
+    return imageURI;
   } catch (error) {
     console.error('Error getting pool logo URI:', error);
     return undefined;
@@ -105,8 +109,13 @@ export const getPoolByIdFromChain = async (id: string, walletProvider?: unknown)
     // Get pool details from the contract
     const [
       name,
+      description,
+      imageURI,
+      videoLink,
+      targetAmount,
+      endDate,
       totalDonated,
-      , // Skip totalWithdrawn
+      ,  // Skip totalWithdrawn
       active,
       checkpoints,
       currentCheckpointIndex,
@@ -117,32 +126,41 @@ export const getPoolByIdFromChain = async (id: string, walletProvider?: unknown)
     const itemTokens = await contract.getPoolItems(poolId);
     const donorCount = itemTokens.length;
     
-    // Convert totalDonated from wei to ether
-    const donatedAmount = Number(totalDonated) / 1e18;
+    // Convert values from BigInt to Number for calculations
+    const targetAmountNum = Number(targetAmount);
+    const totalDonatedNum = Number(totalDonated);
+    const endDateNum = Number(endDate);
     
-    // For demonstration purposes, we'll set some placeholder values
-    const targetAmount = donatedAmount * 1.5; // Just an example
-    const percentageRaised = Math.min(Math.floor((donatedAmount / targetAmount) * 100), 100);
+    // Convert values from wei to ether
+    const donatedAmount = totalDonatedNum / 1e18;
+    const targetAmountEth = targetAmountNum / 1e18;
     
-    // Try to get the logo URI from the first pool item
-    const logoURI = await getPoolLogoURI(poolId);
+    // Calculate percentage raised
+    const percentageRaised = targetAmountNum > 0 
+      ? Math.min(Math.floor((totalDonatedNum / targetAmountNum) * 100), 100) 
+      : 0;
+    
+    // Calculate days left
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const secondsLeft = Math.max(0, endDateNum - currentTimestamp);
+    const daysLeft = Math.ceil(secondsLeft / (60 * 60 * 24));
     
     return {
       id: id,
       title: name,
       tagline: `${name} Crowdfunding Pool`,
-      categories: ['CROWDFUNDING',],
+      categories: ['CROWDFUNDING'],
       badges: active ? ['ACTIVE'] : ['INACTIVE'],
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+      videoUrl: videoLink,
       status: active ? 'Live' : 'Closed',
       currentAmount: donatedAmount,
-      targetAmount: targetAmount,
+      targetAmount: targetAmountEth,
       percentageRaised: percentageRaised,
       donors: donorCount,
-      largestInvestment: donatedAmount * 0.3, // Just an example
-      daysLeft: active ? 14 : 0, // Just an example
-      logoUrl: logoURI || '/logos/habibi.jpg', // Use blockchain URI if available, else use placeholder
-      description: `This crowdfunding pool for ${name} is a platform for individuals and organizations to raise funds for their projects.`,
+      largestInvestment: donatedAmount * 0.3, // Just an example, could be calculated from events
+      daysLeft: daysLeft,
+      logoUrl: imageURI || '/logos/habibi.jpg',
+      description: description,
       checkpoints, 
       currentCheckpointIndex: Number(currentCheckpointIndex),
       checkpointReleaseStatus

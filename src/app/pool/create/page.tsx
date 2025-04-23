@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { ethers } from 'ethers';
 import { toast } from 'sonner';
 import { getContract } from '@/utils/contract';
-import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import { useAppKitAccount } from '@reown/appkit/react';
+import { RPC_URL } from '@/utils/config';
 
 export default function CreatePoolPage() {
   const router = useRouter();
   const { isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider("eip155");
   
   const [formData, setFormData] = useState({
     name: '',
@@ -65,7 +65,21 @@ export default function CreatePoolPage() {
     setIsSubmitting(true);
     
     try {
-      const contract = await getContract(walletProvider);
+      // Get private key from environment variables
+      const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY;
+      
+      if (!privateKey) {
+        throw new Error('Private key not found in environment variables');
+      }
+      
+      // Initialize provider
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      
+      // Create wallet from private key
+      const wallet = new ethers.Wallet(privateKey, provider);
+      
+      // Get contract with signer
+      const contract = await getContract(wallet);
       
       // Calculate end date in seconds since epoch (UNIX timestamp)
       const endDateTimestamp = Math.floor(new Date(formData.endDate).getTime() / 1000);
