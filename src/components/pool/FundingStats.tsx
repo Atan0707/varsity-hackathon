@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ProgressBar from '../ProgressBar';
 import DonateButton from '@/components/pool/DonateButton';
 import { getPoolByIdFromChain } from '@/utils/contract';
@@ -23,7 +23,7 @@ const FundingStats: React.FC<FundingStatsProps> = ({
   const [isError, setIsError] = useState(false);
 
   // Function to fetch data from blockchain
-  const fetchPoolData = async () => {
+  const fetchPoolData = useCallback(async () => {
     try {
       setIsLoading(true);
       setIsError(false);
@@ -44,12 +44,12 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [poolId]);
 
   // Fetch pool data on component mount and when poolId changes
   useEffect(() => {
     fetchPoolData();
-  }, [poolId]);
+  }, [poolId, fetchPoolData]);
 
   // Handle donation success - refresh data
   const handleDonationSuccess = () => {

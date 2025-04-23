@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.0.6",
+    "@react-three/fiber": "^9.1.2",
     "@reown/appkit": "^1.7.0",
     "@reown/appkit-adapter-ethers": "^1.7.0",
     "@tanstack/react-query": "^5.69.0",
@@ -23,7 +25,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.1",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.2",
+    "three": "^0.176.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

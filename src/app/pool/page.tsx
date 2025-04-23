@@ -91,7 +91,7 @@ export default function PoolsListPage() {
     };
     
     fetchPools();
-  }, []);
+  }, [getDonorsQuery]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 bg-[rgb(256,252,228)]">

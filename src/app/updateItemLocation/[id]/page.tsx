@@ -4,7 +4,7 @@
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 import { Eip1193Provider } from "ethers";
 import { ethers } from "ethers";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS } from "@/utils/config";
 import ABI from "../../../contract/abi.json";
 import { useParams, useRouter } from "next/navigation";
@@ -43,13 +43,7 @@ export default function ScanItemsPage() {
 
     const isNfcSupported = typeof window !== "undefined" && "NDEFReader" in window;
 
-    useEffect(() => {
-        if (isConnected && walletProvider) {
-            fetchPoolDetails();
-        }
-    }, [isConnected, walletProvider, poolId]);
-
-    const fetchPoolDetails = async () => {
+    const fetchPoolDetails = useCallback(async () => {
         try {
             setLoading(true);
             const provider = new ethers.BrowserProvider(
@@ -78,7 +72,13 @@ export default function ScanItemsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [walletProvider, poolId]);
+
+    useEffect(() => {
+        if (isConnected && walletProvider) {
+            fetchPoolDetails();
+        }
+    }, [isConnected, walletProvider, fetchPoolDetails]);
 
     const getCurrentLocation = async () => {
         setIsLoadingLocation(true);

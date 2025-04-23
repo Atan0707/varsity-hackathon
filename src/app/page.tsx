@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAppKit } from "@reown/appkit/react";
 import { getAllPoolsFromChain } from "@/utils/contract";
 import { Pool, formatCurrency } from "@/utils/poolData";
@@ -71,42 +72,59 @@ export default function Home() {
     };
     
     fetchPools();
-  }, []);
+  }, [getDonorsQuery]);
   
   // Handle wallet connection
   const handleConnectClick = () => {
     open();
   };
+
+  
   
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="relative bg-[#0c252a] overflow-hidden">
-        {/* Left lime circle */}
-        <div className="absolute left-0 top-0 w-[400px] h-[400px] bg-[#d9ff56] rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+      {/* Hero Section with Background Image */}
+      <div className="relative min-h-screen bg-[#5a2a10] overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/img/back2.png"
+            alt="Background" 
+            fill
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            priority
+            className="opacity-70"
+          />
+        </div>
         
-        {/* Right lime circle */}
-        <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-[#d9ff56] rounded-full translate-x-1/4 translate-y-1/4"></div>
+        {/* Navbar */}
         
-        <div className="container mx-auto px-6 py-24 md:py-32 relative z-10">
-          <div className="flex flex-col items-center justify-center text-center">
-            <h1 className="text-4xl md:text-7xl font-bold text-white mb-8">
-              GlassFund
+        
+        {/* Hero Content */}
+        <div className="container mx-auto px-6 h-screen pt-24 flex flex-col justify-center items-start relative z-10">
+          <div className="max-w-2xl">
+            <div className="text-[#ed6400] font-proto text-sm md:text-base uppercase tracking-wide mb-4">
+              Hi, We are GlassFund
+            </div>
+            <h1 className="text-5xl md:text-7xl font-light text-white mb-6 font-proto leading-tight">
+              Track Donations,<br />
+              Trust Process
             </h1>
-            <p className="text-lg md:text-2xl text-white mb-12 max-w-3xl">
-              Track donations, trust the process
+            <p className="text-lg md:text-xl text-white mb-8 max-w-lg">
+              We make great digital experiences.<br />
+              Scroll to find out how we do it.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={handleConnectClick}
-                className="px-8 py-4 bg-[#d9ff56] text-[#0c252a] font-medium rounded-md hover:bg-opacity-90 transition"
+                className="px-8 py-4 bg-[#ed6400] text-[#5a2a10] font-proto font-light rounded-md hover:bg-opacity-90 transition"
               >
                 Connect Wallet
               </button>
               <Link 
                 href="/about" 
-                className="px-8 py-4 text-white font-medium hover:underline"
+                className="px-8 py-4 text-white font-proto font-light hover:underline"
               >
                 Find out more
               </Link>
@@ -120,7 +138,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#0c252a]">Discover Pool - Donate Today</h2>
+              <h2 className="text-2xl md:text-3xl font-light text-[#0c252a] font-proto">Discover Pool - Donate Today</h2>
               <div className="flex space-x-2">
                 <button className="w-10 h-10 flex items-center justify-center bg-[#0c252a] text-white rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -155,7 +173,7 @@ export default function Home() {
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-[#0c252a] mb-2">{pool.title}</h3>
+                      <h3 className="text-xl font-light text-[#0c252a] mb-2 font-proto">{pool.title}</h3>
                       
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-bold text-[#0c252a]">{formatCurrency(pool.currentAmount)}</div>
@@ -181,7 +199,7 @@ export default function Home() {
                       <div className="mt-4">
                         <Link 
                           href={`/pool/${pool.id}`}
-                          className="block w-full text-center py-2 px-4 bg-[#d9ff56] text-[#0c252a] font-medium rounded-md hover:bg-opacity-90 transition"
+                          className="block w-full text-center py-2 px-4 bg-[#d9ff56] text-[#0c252a] font-proto font-light rounded-md hover:bg-opacity-90 transition"
                         >
                           View Pool
                         </Link>
@@ -200,7 +218,7 @@ export default function Home() {
             <div className="flex justify-center mt-12">
               <Link 
                 href="/pool" 
-                className="px-8 py-4 bg-[#d9ff56] text-[#0c252a] font-medium rounded-full hover:bg-opacity-90 transition"
+                className="px-8 py-4 bg-[#d9ff56] text-[#0c252a] font-proto font-light rounded-full hover:bg-opacity-90 transition"
               >
                 Discover GlassFund
               </Link>

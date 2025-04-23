@@ -3,10 +3,11 @@
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 import { Eip1193Provider } from "ethers";
 import { ethers } from "ethers";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS } from "@/utils/config";
 import ABI from "../../contract/abi.json";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function PoolsPage() {
     const { isConnected } = useAppKitAccount();
@@ -15,13 +16,7 @@ export default function PoolsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (isConnected && walletProvider) {
-            fetchPools();
-        }
-    }, [isConnected, walletProvider]);
-
-    const fetchPools = async () => {
+    const fetchPools = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -49,7 +44,13 @@ export default function PoolsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [walletProvider]);
+
+    useEffect(() => {
+        if (isConnected && walletProvider) {
+            fetchPools();
+        }
+    }, [isConnected, walletProvider, fetchPools]);
 
     return (
         <div className="flex flex-col items-center min-h-screen p-8 bg-[rgb(256,252,228)]">
@@ -89,10 +90,11 @@ export default function PoolsPage() {
                                     className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all"
                                 >
                                     <div className="h-48 bg-gray-300 relative">
-                                        <img
+                                        <Image
                                             src={`https://placehold.co/400x200/e9e9dc/0c252a?text=${encodeURIComponent(pool.name)}`}
                                             alt={pool.name}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            className="object-cover"
                                         />
                                     </div>
                                     <div className="p-6">

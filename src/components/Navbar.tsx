@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -111,23 +112,36 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-14 md:h-16">
           {/* Left side navigation */}
           <div className="hidden lg:flex items-center space-x-8">
+            {/* Logo */}
+            <Link href="/" className="flex items-center mr-4">
+              <div className="relative w-10 h-10 rounded-md overflow-hidden">
+                <Image 
+                  src="/logos/logo3.png" 
+                  alt="GlassFund Logo" 
+                  width={40} 
+                  height={40}
+                  className="object-cover"
+                />
+              </div>
+            </Link>
+            
             <Link
               href="/"
-              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
-                ${pathname === "/" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+              className={`text-[#ed6400] hover:text-[rgba(0, 0, 0, 0.8)] font-medium transition-colors pb-1
+                ${pathname === "/" ? "border-b-[3px] border-[#ed6400]" : ""}`}
             >
               Home
             </Link>
             <Link
               href="/pool"
-              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
-                ${pathname === "/pool" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
+              className={`text-[#ed6400] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                ${pathname === "/pool" ? "border-b-[3px] border-[#ed6400]" : ""}`}
             >
               Pool
             </Link>
             <Link
               href="/mintItem"
-              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+              className={`text-[#ed6400] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
                 ${pathname === "/mintItem" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
             >
               Mint
@@ -137,7 +151,7 @@ export default function Navbar() {
           {/* Center logo */}
           <div className="flex lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2">
             <Link href="/" className="flex-shrink-0 group">
-              <span className="text-xl md:text-2xl font-bold text-[rgba(15,45,50,255)] group-hover:text-[rgba(15,45,50,0.8)] transition-colors">
+              <span className="text-xl md:text-2xl font-bold text-[#ed6400] group-hover:text-[rgba(15,45,50,0.8)] transition-colors">
                 GlassFund
               </span>
             </Link>
@@ -148,7 +162,7 @@ export default function Navbar() {
             <div className="hidden lg:block">
               <Link
                 href="/"
-                className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
+                className={`text-[#ed6400] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
                   ${pathname === "/support" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
               >
                 Support Center
@@ -166,7 +180,7 @@ export default function Navbar() {
                         icon: "👤",
                       });
                     }}
-                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded-lg 
+                    className="px-4 py-1.5 text-[#ed6400] border border-[#ed6400] rounded-lg 
                       hover:bg-[rgba(15,45,50,0.1)] font-medium transition-colors"
                   >
                     {formatAddress(address)}
@@ -174,7 +188,7 @@ export default function Navbar() {
                 ) : (
                   <button
                     onClick={handleConnectClick}
-                    className="px-4 py-1.5 text-[rgba(15,45,50,255)] border border-[rgba(15,45,50,255)] rounded-lg 
+                    className="px-4 py-1.5 text-[#ed6400] border border-[#ed6400] rounded-lg 
                       hover:bg-[rgba(15,45,50,0.1)] font-medium transition-colors"
                   >
                     Connect
@@ -237,6 +251,18 @@ export default function Navbar() {
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <div className="flex flex-col h-full px-4 pt-4 pb-20 overflow-y-auto">
+              <div className="flex items-center mb-6">
+                <div className="relative w-10 h-10 rounded-md overflow-hidden mr-3">
+                  <Image 
+                    src="/logos/glasslogo.png" 
+                    alt="GlassFund Logo" 
+                    width={40} 
+                    height={40}
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-xl font-bold text-[rgba(15,45,50,255)]">GlassFund</span>
+              </div>
               <div className="space-y-4">
                 <Link
                   href="/"
