@@ -97,6 +97,17 @@ export default function PoolsListPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 bg-[rgb(256,252,228)]">
 
+      {/* Header with Create button */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-[#0c252a]">Donation Pools</h1>
+        <Link href="/pool/create" className="bg-[#0c252a] text-white py-3 px-6 rounded-md hover:bg-[#0c252a]/90 transition flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Create New Pool
+        </Link>
+      </div>
+
       {/* Search section  */}
        <div className="mb-8 flex gap-3">
         <div className="relative flex-grow">

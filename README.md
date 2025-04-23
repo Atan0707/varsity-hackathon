@@ -26,15 +26,6 @@ GlassFund introduces a new model for charity donations where:
    - Staff scan NFC stickers to update the location of items
    - Donors can track their donations in real-time
 
-## DAO Governance
-
-GlassFund incorporates DAO functionality that allows stakeholders to:
-
-- Create proposals for new donation pools or charity initiatives
-- Vote on existing proposals
-- Track proposal status and execution
-- Participate in community governance decisions
-
 ## Front-End View
 
 ### GlassFund Landing Page

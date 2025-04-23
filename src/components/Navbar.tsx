@@ -126,13 +126,6 @@ export default function Navbar() {
               Pool
             </Link>
             <Link
-              href="/dao"
-              className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
-                ${pathname === "/dao" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
-            >
-              DAO
-            </Link>
-            <Link
               href="/mintItem"
               className={`text-[rgba(15,45,50,255)] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
                 ${pathname === "/mintItem" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
