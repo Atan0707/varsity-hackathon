@@ -30,7 +30,7 @@ const PoolInfo: React.FC<PoolInfoProps> = ({ pool }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Target:</span>
-                <span className="text-gray-900 font-medium">RM {pool.targetAmount.toLocaleString()}</span>
+                <span className="text-gray-900 font-medium">{pool.targetAmount.toLocaleString()} ETH</span>
               </div>
             </div>
           </div>
