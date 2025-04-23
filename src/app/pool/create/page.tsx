@@ -8,6 +8,7 @@ import { getContract } from '@/utils/contract';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { RPC_URL } from '@/utils/config';
 import axios from 'axios';
+import Image from 'next/image';
 
 export default function CreatePoolPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function CreatePoolPage() {
     videoLink: 'https://www.youtube.com/watch?v=xvFZjo5PgG0',
     targetAmount: '',
     endDate: '',
-    checkpoints: []
+    checkpoints: [] as string[]
   });
   
   const [checkpointInput, setCheckpointInput] = useState('');
@@ -259,11 +260,14 @@ export default function CreatePoolPage() {
                   <div className="mt-2">
                     <p className="text-xs text-gray-500 mb-1">Uploaded to IPFS:</p>
                     <div className="flex items-center space-x-2">
-                      <img 
-                        src={formData.imageURI} 
-                        alt="Uploaded preview" 
-                        className="h-16 w-16 object-cover rounded-md border border-gray-300" 
-                      />
+                      <div className="relative h-16 w-16">
+                        <Image 
+                          src={formData.imageURI} 
+                          alt="Uploaded preview" 
+                          fill
+                          className="object-cover rounded-md border border-gray-300" 
+                        />
+                      </div>
                       <input
                         type="text"
                         value={formData.imageURI}

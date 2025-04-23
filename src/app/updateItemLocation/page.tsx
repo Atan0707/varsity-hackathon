@@ -1,13 +1,13 @@
 "use client";
 
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from "next/link";
+import Image from "next/image";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 import { Eip1193Provider } from "ethers";
 import { ethers } from "ethers";
-import { useState, useEffect, useCallback } from "react";
 import { CONTRACT_ADDRESS } from "@/utils/config";
 import ABI from "../../contract/abi.json";
-import Link from "next/link";
-import Image from "next/image";
 
 export default function PoolsPage() {
     const { isConnected } = useAppKitAccount();
