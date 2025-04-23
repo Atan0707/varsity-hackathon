@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    uint256 private _tokenIds;
 
     struct DonationPool {
         string name;
+        string description;
+        string imageURI;
+        string videoLink;
+        uint256 targetAmount;
+        uint256 endDate;
         uint256 totalDonated;
         uint256 totalWithdrawn;
         bool active;
@@ -39,7 +42,13 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
     address public companyWallet;
 
     // Events
-    event PoolCreated(uint256 poolId, string name);
+    event PoolCreated(
+        uint256 poolId, 
+        string name, 
+        string description, 
+        uint256 targetAmount, 
+        uint256 endDate
+    );
     event DonationReceived(address donor, uint256 poolId, uint256 amount);
     event ItemCreated(uint256 tokenId, string name, uint256 poolId);
     event LocationUpdated(
@@ -64,19 +73,35 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
     // Create a new donation pool
     function createPool(
         string memory name,
+        string memory description,
+        string memory imageURI,
+        string memory videoLink,
+        uint256 targetAmount,
+        uint256 endDate,
         string[] memory checkpoints
     ) external onlyOwner {
         uint256 poolId = poolCount;
 
         DonationPool storage newPool = donationPools[poolId];
         newPool.name = name;
+        newPool.description = description;
+        newPool.imageURI = imageURI;
+        newPool.videoLink = videoLink;
+        newPool.targetAmount = targetAmount;
+        newPool.endDate = endDate;
         newPool.active = true;
 
         for (uint i = 0; i < checkpoints.length; i++) {
             newPool.checkpoints.push(checkpoints[i]);
         }
 
-        emit PoolCreated(poolId, name);
+        emit PoolCreated(
+            poolId, 
+            name, 
+            description, 
+            targetAmount, 
+            endDate
+        );
         poolCount++;
     }
 
@@ -85,6 +110,10 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
         require(poolId < poolCount, "Pool does not exist");
         require(donationPools[poolId].active, "Pool is not active");
         require(msg.value > 0, "Must donate something");
+        require(block.timestamp <= donationPools[poolId].endDate, "Donation period has ended");
+        
+        uint256 newTotal = donationPools[poolId].totalDonated + msg.value;
+        require(newTotal <= donationPools[poolId].targetAmount, "Donation would exceed target amount");
 
         donationPools[poolId].totalDonated += msg.value;
         donorContributions[msg.sender][poolId] += msg.value;
@@ -101,8 +130,8 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
     ) external onlyOwner returns (uint256) {
         require(poolId < poolCount, "Pool does not exist");
 
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
+        _tokenIds++;
+        uint256 newItemId = _tokenIds;
 
         _mint(msg.sender, newItemId);
 
@@ -304,6 +333,11 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
         view
         returns (
             string memory name,
+            string memory description,
+            string memory imageURI,
+            string memory videoLink,
+            uint256 targetAmount,
+            uint256 endDate,
             uint256 totalDonated,
             uint256 totalWithdrawn,
             bool active,
@@ -323,6 +357,11 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
 
         return (
             pool.name,
+            pool.description,
+            pool.imageURI,
+            pool.videoLink,
+            pool.targetAmount,
+            pool.endDate,
             pool.totalDonated,
             pool.totalWithdrawn,
             pool.active,
@@ -339,22 +378,34 @@ contract DonationTracker is ERC721URIStorage, Ownable, ReentrancyGuard {
         returns (
             uint256[] memory ids,
             string[] memory names,
+            string[] memory descriptions,
+            string[] memory imageURIs,
+            uint256[] memory targetAmounts,
+            uint256[] memory endDates,
             bool[] memory activeStatus,
             uint256[] memory totalDonated
         )
     {
         ids = new uint256[](poolCount);
         names = new string[](poolCount);
+        descriptions = new string[](poolCount);
+        imageURIs = new string[](poolCount);
+        targetAmounts = new uint256[](poolCount);
+        endDates = new uint256[](poolCount);
         activeStatus = new bool[](poolCount);
         totalDonated = new uint256[](poolCount);
 
         for (uint256 i = 0; i < poolCount; i++) {
             ids[i] = i;
             names[i] = donationPools[i].name;
+            descriptions[i] = donationPools[i].description;
+            imageURIs[i] = donationPools[i].imageURI;
+            targetAmounts[i] = donationPools[i].targetAmount;
+            endDates[i] = donationPools[i].endDate;
             activeStatus[i] = donationPools[i].active;
             totalDonated[i] = donationPools[i].totalDonated;
         }
 
-        return (ids, names, activeStatus, totalDonated);
+        return (ids, names, descriptions, imageURIs, targetAmounts, endDates, activeStatus, totalDonated);
     }
 }
