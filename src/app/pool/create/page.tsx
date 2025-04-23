@@ -1,33 +1,99 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ethers } from 'ethers';
 import { toast } from 'sonner';
 import { getContract } from '@/utils/contract';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { RPC_URL } from '@/utils/config';
+import axios from 'axios';
 
 export default function CreatePoolPage() {
   const router = useRouter();
   const { isConnected } = useAppKitAccount();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     imageURI: '',
-    videoLink: '',
+    videoLink: 'https://www.youtube.com/watch?v=xvFZjo5PgG0',
     targetAmount: '',
     endDate: '',
-    checkpoints: ['Started', 'In Transit', 'Delivered']
+    checkpoints: []
   });
   
   const [checkpointInput, setCheckpointInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    setSelectedFileName(file.name);
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+    
+    await uploadToPinata(file);
+  };
+
+  const uploadToPinata = async (file: File) => {
+    setIsUploading(true);
+    
+    try {
+      // Create form data for the file
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Set a unique file name with timestamp
+      const fileName = `${Date.now()}-${file.name}`;
+      formData.append('pinataMetadata', JSON.stringify({
+        name: fileName
+      }));
+      
+      // Set options
+      formData.append('pinataOptions', JSON.stringify({
+        cidVersion: 1
+      }));
+      
+      // Upload to Pinata using JWT
+      const JWT = process.env.NEXT_PUBLIC_PINATA_JWT;
+      
+      const response = await axios.post(
+        'https://api.pinata.cloud/pinning/pinFileToIPFS',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${JWT}`
+          }
+        }
+      );
+      
+      // Use the IPFS hash to create a URL
+      const ipfsHash = response.data.IpfsHash;
+      const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+      
+      // Update form data
+      setFormData(prev => ({ ...prev, imageURI: ipfsUrl }));
+      toast.success('Image uploaded to IPFS successfully!');
+    } catch (error) {
+      console.error('Error uploading to Pinata:', error);
+      toast.error('Failed to upload image to IPFS');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleCheckpointAdd = () => {
@@ -165,25 +231,54 @@ export default function CreatePoolPage() {
               </div>
               
               <div>
-                <label htmlFor="imageURI" className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URI *
+                <label htmlFor="imageFile" className="block text-sm font-medium text-gray-700 mb-1">
+                  Upload Image *
                 </label>
-                <input
-                  type="url"
-                  id="imageURI"
-                  name="imageURI"
-                  value={formData.imageURI}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#0c252a]"
-                  placeholder="https://example.com/image.jpg"
-                  required
-                />
-                <p className="mt-1 text-xs text-gray-500">URL to an image that represents your donation pool</p>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="file"
+                    id="imageFile"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? 'Uploading...' : 'Choose Image'}
+                  </button>
+                  <span className="text-sm text-gray-500 truncate max-w-xs">
+                    {selectedFileName || 'No file selected'}
+                  </span>
+                </div>
+                {formData.imageURI && (
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-500 mb-1">Uploaded to IPFS:</p>
+                    <div className="flex items-center space-x-2">
+                      <img 
+                        src={formData.imageURI} 
+                        alt="Uploaded preview" 
+                        className="h-16 w-16 object-cover rounded-md border border-gray-300" 
+                      />
+                      <input
+                        type="text"
+                        value={formData.imageURI}
+                        readOnly
+                        className="flex-1 px-3 py-1 text-xs border border-gray-300 rounded-md bg-gray-50"
+                      />
+                    </div>
+                  </div>
+                )}
+                <p className="mt-1 text-xs text-gray-500">Image will be uploaded to IPFS via Pinata</p>
               </div>
               
               <div>
                 <label htmlFor="videoLink" className="block text-sm font-medium text-gray-700 mb-1">
-                  Video Link
+                  Video Link *
                 </label>
                 <input
                   type="url"
@@ -192,9 +287,10 @@ export default function CreatePoolPage() {
                   value={formData.videoLink}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#0c252a]"
-                  placeholder="https://youtube.com/watch?v=example"
+                  placeholder="https://www.youtube.com/watch?v=xvFZjo5PgG0"
+                  required
                 />
-                <p className="mt-1 text-xs text-gray-500">URL to a video about your donation pool (optional)</p>
+                <p className="mt-1 text-xs text-gray-500">URL to a video about your donation pool </p>
               </div>
             </div>
           </div>
@@ -216,7 +312,7 @@ export default function CreatePoolPage() {
                   step="0.01"
                   min="0.01"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#0c252a]"
-                  placeholder="e.g., 10.5"
+                  placeholder="1"
                   required
                 />
               </div>
@@ -301,9 +397,9 @@ export default function CreatePoolPage() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !isConnected}
+              disabled={isSubmitting || !isConnected || isUploading}
               className={`px-6 py-3 bg-[#0c252a] text-white rounded-md hover:bg-[#0c252a]/90 transition ${
-                (isSubmitting || !isConnected) ? 'opacity-50 cursor-not-allowed' : ''
+                (isSubmitting || !isConnected || isUploading) ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               {isSubmitting ? 'Creating...' : 'Create Pool'}
