@@ -9,6 +9,7 @@ import { Pool, formatCurrency } from "@/utils/poolData";
 import { PoolLogo } from '@/components/ui/pool-logo';
 import { gql, request } from 'graphql-request';
 import { SUBGRAPH_URL } from '@/utils/config';
+import DecryptedText from '@/components/DecryptedText';
 
 // GraphQL response type
 interface DonationReceivedResponse {
@@ -107,8 +108,26 @@ export default function Home() {
               Hi, We are GlassFund
             </div>
             <h1 className="text-5xl md:text-7xl font-light text-white mb-6 font-proto leading-tight">
-              Track Donations,<br />
-              Trust Process
+              <DecryptedText 
+                text="Track Donations," 
+                animateOn="view" 
+                sequential={true} 
+                speed={70}
+                maxIterations={15}
+                characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+"
+                className="text-white"
+                encryptedClassName="text-[#ed6400]"
+              /><br />
+              <DecryptedText 
+                text="Trust Process" 
+                animateOn="view" 
+                sequential={true} 
+                speed={70} 
+                maxIterations={15}
+                characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!@#$%^&*()_+"
+                className="text-white"
+                encryptedClassName="text-[#ed6400]"
+              />
             </h1>
             <p className="text-lg md:text-xl text-white mb-8 max-w-lg">
               We make great digital experiences.<br />
@@ -118,7 +137,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={handleConnectClick}
-                className="px-8 py-4 bg-[#ed6400] text-[#5a2a10] font-proto font-light rounded-md hover:bg-opacity-90 transition"
+                className="px-8 py-4 bg-[#ed6400] text-[#FFFFFF] font-proto font-light rounded-md hover:bg-opacity-90 transition"
               >
                 Connect Wallet
               </button>
@@ -138,14 +157,14 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-light text-[#0c252a] font-proto">Discover Pool - Donate Today</h2>
+              <h2 className="text-2xl md:text-3xl font-light text-[#ed6400] font-proto">Discover Pool - Donate Today</h2>
               <div className="flex space-x-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-[#0c252a] text-white rounded-full">
+                <button className="w-10 h-10 flex items-center justify-center bg-[#ed6400] text-white rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                   </svg>
                 </button>
-                <button className="w-10 h-10 flex items-center justify-center bg-[#0c252a] text-white rounded-full">
+                <button className="w-10 h-10 flex items-center justify-center bg-[#ed6400] text-white rounded-full">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
@@ -199,7 +218,7 @@ export default function Home() {
                       <div className="mt-4">
                         <Link 
                           href={`/pool/${pool.id}`}
-                          className="block w-full text-center py-2 px-4 bg-[#d9ff56] text-[#0c252a] font-proto font-light rounded-md hover:bg-opacity-90 transition"
+                          className="block w-full text-center py-2 px-4 bg-[#ed6400] text-[#FFFFFF] font-proto font-light rounded-md hover:bg-opacity-90 transition"
                         >
                           View Pool
                         </Link>
@@ -218,7 +237,7 @@ export default function Home() {
             <div className="flex justify-center mt-12">
               <Link 
                 href="/pool" 
-                className="px-8 py-4 bg-[#d9ff56] text-[#0c252a] font-proto font-light rounded-full hover:bg-opacity-90 transition"
+                className="px-8 py-4 bg-[#ed6400] text-[#FFFFFF] font-proto font-light rounded-full hover:bg-opacity-90 transition"
               >
                 Discover GlassFund
               </Link>

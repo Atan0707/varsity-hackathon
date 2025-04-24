@@ -223,7 +223,7 @@ export default function Home() {
                 )}
 
                 {/* NFT Creation Form */}
-                <div className="mb-8 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl shadow-xl">
+                <div className="mb-8 p-6 bg-[#ed6400] border border-[#d9ff56]/20 rounded-xl shadow-xl">
                     <h2 className="text-xl font-semibold mb-6 text-white">
                         Create NFT
                     </h2>
@@ -298,7 +298,7 @@ export default function Home() {
                             disabled={!nftName || !nftImageURI || !location}
                             className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${!nftName || !nftImageURI || !location
                                 ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                                : "bg-[#d9ff56] text-[#0c252a] hover:bg-opacity-90"
+                                : "bg-[#000000] text-[#FFFFFF] hover:bg-opacity-90"
                                 }`}
                         >
                             Mint NFT
@@ -358,7 +358,7 @@ export default function Home() {
                 )}
 
                 {/* Instructions Section */}
-                <div className="mt-6 p-6 bg-[#0c252a] border border-[#d9ff56]/20 rounded-xl">
+                <div className="mt-6 p-6 bg-[#ed6400] border border-[#d9ff56]/20 rounded-xl">
                     <h2 className="text-xl font-semibold mb-4 text-white">
                         Instructions
                     </h2>
