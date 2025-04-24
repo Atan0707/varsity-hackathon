@@ -1,4 +1,7 @@
 'use client';
+import { CONTRACT_ADDRESS, RPC_URL } from '@/utils/config';
+import { ethers } from 'ethers';
+import contractAbi from '@/contract/abi.json';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -125,6 +128,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>('processing');
   const [verificationClicked, setVerificationClicked] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   // Bank payment form state
   const [bankDetails, setBankDetails] = useState({
@@ -143,6 +147,104 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
     { id: 'maybank', name: 'Maybank', logo: '/banks/maybank-logo.png' },
     { id: 'rhb', name: 'RHB', logo: '/banks/rhb-logo.png' },
   ];
+
+  // Function to interact with blockchain contract for donation
+  const processDonationOnChain = async () => {
+    try {
+      // Convert the amount to 4 decimal places (like in ZakatPay)
+      // 100 RM → becomes 1,000,000 units on blockchain (100 × 10^4)
+      const amountInUnits = ethers.parseUnits(amount || '0', 4);
+      
+      // For display purposes
+      const displayAmount = amount;
+      console.log(`Converting ${displayAmount} MYR to ${amountInUnits.toString()} units (4 decimal places)`);
+      
+      // Create provider and connect to the network
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      
+      // Get the private key from environment variables and ensure it has 0x prefix
+      let privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY || "";
+      
+      // Add 0x prefix if it's missing
+      if (privateKey && !privateKey.startsWith('0x')) {
+        privateKey = `0x${privateKey}`;
+      }
+      
+      // Create a wallet with the private key
+      const wallet = new ethers.Wallet(privateKey, provider);
+      
+      // Check if wallet has sufficient balance
+      const walletBalance = await provider.getBalance(wallet.address);
+      console.log("Wallet balance:", ethers.formatEther(walletBalance), "ETH");
+      
+      // Create the contract instance with proper connection
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, wallet);
+      
+      // Log some debugging information
+      console.log("Contract address:", CONTRACT_ADDRESS);
+      console.log("Wallet address:", wallet.address);
+      console.log("Pool ID to donate to:", poolId);
+      
+      try {
+        // Call the donate function on the contract with 4 decimal places value
+        const tx = await contract.donate(parseInt(poolId), {
+          value: amountInUnits,
+          gasLimit: BigInt(300000)
+        });
+        
+        console.log("Transaction sent:", tx.hash);
+        
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait();
+        
+        console.log("Transaction confirmed:", receipt);
+        return {
+          success: true,
+          txHash: tx.hash,
+          displayAmount: displayAmount
+        };
+      } catch (contractError) {
+        console.error("Contract call error:", contractError);
+        
+        // Extract the revert reason if possible
+        let errorMessage = "Contract transaction failed";
+        
+        // Any contract error can be cast to have these potential properties
+        interface ContractErrorWithData {
+          message: string;
+          data?: string;
+          reason?: string;
+          code?: string;
+        }
+        
+        // Use the error properties more safely
+        const ethersError = contractError as ContractErrorWithData;
+        if (ethersError.message) {
+          errorMessage = ethersError.message;
+          
+          // Try to extract revert reason if available
+          if (ethersError.reason) {
+            errorMessage += ` - Reason: ${ethersError.reason}`;
+          } else if (ethersError.data) {
+            errorMessage += ` - Data: ${ethersError.data}`;
+          } else if (ethersError.code) {
+            errorMessage += ` - Code: ${ethersError.code}`;
+          }
+        }
+        
+        return {
+          success: false,
+          error: errorMessage
+        };
+      }
+    } catch (error) {
+      console.error("Blockchain donation error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -202,7 +304,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       // We'll let the confirmation button handle the rest of the process
       setIsLoading(false);
     }
-  }
+  };
   
   const handleSecureVerificationClick = () => {
     setVerificationClicked(true);
@@ -218,7 +320,50 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       // If completed or failed, close confirmation and modal
       setShowConfirmation(false);
       setShowModal(false);
+      
+      // Reset form state and call onSuccess callback if payment was successful
+      if (paymentStatus === 'success') {
+        setAmount('');
+        if (onSuccess) onSuccess();
+      }
     }
+  };
+
+  // Handle confirmation button click with blockchain transaction
+  const handleConfirmPayment = async () => {
+    setIsLoading(true);
+    
+    // For FPX, simulate processing first
+    setTimeout(async () => {
+      // After UI simulation, process actual blockchain transaction
+      try {
+        const result = await processDonationOnChain();
+        
+        if ('success' in result && result.success) {
+          setTxHash(result.txHash);
+          setPaymentStatus('success');
+          
+          // Remove the automatic timeout that closes the payment modal
+          // setTimeout(() => {
+          //   setShowConfirmation(false);
+          //   setShowModal(false);
+          //   setAmount('');
+          //   if (onSuccess) onSuccess();
+          // }, 5000);
+        } else {
+          // Ensure we never pass undefined to setError
+          const errorMessage = 'error' in result && result.error ? result.error : 'Transaction failed';
+          setError(errorMessage);
+          setPaymentStatus('failed');
+        }
+      } catch (err) {
+        console.error('Payment processing error:', err);
+        setError('Failed to process payment: ' + (err instanceof Error ? err.message : String(err)));
+        setPaymentStatus('failed');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 2000);
   };
 
   return (
@@ -254,9 +399,6 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 {/* Payment Details */}
                 <div className="border rounded-md p-4 mb-6">
                   <div className="grid grid-cols-2 gap-y-3">
-                    
-                    
-                    
                     <div className="text-gray-700">Organization:</div>
                     <div className="text-right font-medium">Fund</div>
                     
@@ -315,8 +457,25 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 {paymentStatus !== 'processing' && (
                   <div className={`p-3 rounded-md mb-6 text-center ${paymentStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {paymentStatus === 'success' 
-                      ? 'Payment successful! Thank you for your donation.' 
+                      ? `Donation of RM${amount} recorded successfully!` 
                       : 'Payment failed. Please try again.'}
+                    
+                    {/* Show transaction hash if available */}
+                    {paymentStatus === 'success' && txHash && (
+                      <div className="mt-2 text-xs break-all">
+                        <p>Transaction Hash:</p>
+                        <p className="font-mono">{txHash}</p>
+                        <p className="mt-2 text-gray-600">Your donation was processed with 4 decimal places (RM{amount} = {parseInt(amount) * 10000} units)</p>
+                      </div>
+                    )}
+                    
+                    {/* Show detailed error if available */}
+                    {paymentStatus === 'failed' && error && error.length > 0 && (
+                      <div className="mt-2 text-xs break-all">
+                        <p>Error details:</p>
+                        <p className="font-mono">{error}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -340,22 +499,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                   {paymentStatus === 'processing' ? (
                     <>
                       <button
-                        onClick={() => {
-                          setIsLoading(true);
-                          // Simulate FPX processing - increased processing time
-                          setTimeout(() => {
-                            setIsLoading(false);
-                            setPaymentStatus('success');
-                            
-                            // Close everything after 5 seconds on success
-                            setTimeout(() => {
-                              setShowConfirmation(false);
-                              setShowModal(false);
-                              setAmount('');
-                              if (onSuccess) onSuccess();
-                            }, 5000);
-                          }, 4000);
-                        }}
+                        onClick={handleConfirmPayment}
                         className={`px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md ${!verificationClicked || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e6b800]'}`}
                         disabled={!verificationClicked || isLoading}
                       >

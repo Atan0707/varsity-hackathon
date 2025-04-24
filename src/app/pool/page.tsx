@@ -98,8 +98,8 @@ export default function PoolsListPage() {
 
       {/* Header with Create button */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-[#0c252a]">Donation Pools</h1>
-        <Link href="/pool/create" className="bg-[#0c252a] text-white py-3 px-6 rounded-md hover:bg-[#0c252a]/90 transition flex items-center">
+        <h1 className="text-3xl font-bold text-[#ed6400]">Donation Pools</h1>
+        <Link href="/pool/create" className="bg-[#ed6400] text-white py-3 px-6 rounded-md hover:bg-[#0c252a]/90 transition flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -108,52 +108,9 @@ export default function PoolsListPage() {
       </div>
 
       {/* Search section  */}
-       <div className="mb-8 flex gap-3">
-        <div className="relative flex-grow">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg className="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="Search campaign's name..."
-            className="w-full pl-10 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#0c252a]"
-          />
-        </div>
-        <button className="bg-[#0c252a] text-white py-3 px-8 rounded-md hover:bg-[#0c252a]/90 transition whitespace-nowrap flex-shrink-0">
-          Search
-        </button>
-      </div>
+      
 
-      {/* Filter tabs */}
-      <div className="flex justify-between mb-12">
-        <div className="flex flex-wrap overflow-x-auto">
-          <button className="px-4 py-2 bg-[#0c252a] text-white rounded-md mr-2 mb-2 whitespace-nowrap">
-            Non Profit
-          </button>
-          <button className="px-4 py-2 bg-transparent text-[#0c252a] border border-gray-300 rounded-md mr-2 mb-2 whitespace-nowrap hover:bg-gray-100">
-            Social Enterprise
-          </button>
-          <button className="px-4 py-2 bg-transparent text-[#0c252a] border border-gray-300 rounded-md mr-2 mb-2 whitespace-nowrap hover:bg-gray-100">
-            Corporate
-          </button>
-          <button className="px-4 py-2 bg-transparent text-[#0c252a] border border-gray-300 rounded-md mr-2 mb-2 whitespace-nowrap hover:bg-gray-100">
-            Club
-          </button>
-          <button className="px-4 py-2 bg-transparent text-[#0c252a] border border-gray-300 rounded-md mr-2 mb-2 whitespace-nowrap hover:bg-gray-100">
-            Personal Fundraiser
-          </button>
-        </div>
-        <div className="hidden md:block">
-          <button className="px-4 py-2 bg-[#0c252a] text-white rounded-full flex items-center">
-            Name: A to Z
-            <svg className="w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      
 
       {/* Card grid */}
       {loading ? (
