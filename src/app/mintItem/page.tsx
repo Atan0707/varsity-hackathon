@@ -5,7 +5,7 @@ import {
     useAppKitProvider } from "@reown/appkit/react";
 import { Eip1193Provider } from "ethers";
 import { ethers } from "ethers";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { CONTRACT_ADDRESS } from "@/utils/config";
 import ABI from "../../contract/abi.json"
 
@@ -206,65 +206,6 @@ export default function Home() {
         }
     }
 
-    // Image handling functions
-    const handleImageButton = () => {
-        setShowImageOptions(!showImageOptions);
-    };
-    
-    const handleFileSelect = () => {
-        fileInputRef.current?.click();
-        setShowImageOptions(false);
-    };
-    
-    const handleCameraCapture = () => {
-        cameraInputRef.current?.click();
-        setShowImageOptions(false);
-    };
-    
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        
-        setImageFile(file);
-        const preview = URL.createObjectURL(file);
-        setImagePreview(preview);
-        
-        // Here you would normally upload the file to IPFS or your storage service
-        // For now, just setting a placeholder URL
-        // In a real implementation, you'd upload the file and get a URI back
-        try {
-            setIsUploading(true);
-            // Mock upload - replace with actual upload code
-            // Example: const uri = await uploadToIPFS(file);
-            // For demo, we'll use the local preview
-            setTimeout(() => {
-                setNftImageURI(preview);
-                setIsUploading(false);
-            }, 1000);
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            setIsUploading(false);
-        }
-    };
-    
-    // Function to upload to IPFS (placeholder)
-    // In a real implementation, you would connect to IPFS or your preferred storage
-    // For example using NFT.Storage, Pinata, or other services
-    /*
-    const uploadToIPFS = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch('your-upload-endpoint', {
-            method: 'POST',
-            body: formData,
-        });
-        
-        const data = await response.json();
-        return data.ipfsUri; // or whatever format your service returns
-    };
-    */
-
     return (
         <div className="flex flex-col items-center min-h-screen ">
             <div className="w-full max-w-md">
@@ -303,74 +244,15 @@ export default function Home() {
 
                         <div>
                             <label className="block mb-2 text-sm font-medium text-white">
-                                Image
+                                Image URI
                             </label>
-                            <div className="space-y-3">
-                                {imagePreview && (
-                                    <div className="relative w-full h-40 rounded-lg overflow-hidden">
-                                        <img 
-                                            src={imagePreview} 
-                                            alt="NFT preview" 
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                                
-                                <div className="relative">
-                                    <button
-                                        onClick={handleImageButton}
-                                        className="w-full p-3 rounded-lg font-medium transition-all duration-200 bg-white/10 border border-[#d9ff56]/20 text-white hover:bg-white/20"
-                                        disabled={isUploading}
-                                    >
-                                        {isUploading 
-                                            ? "Uploading..." 
-                                            : imagePreview 
-                                                ? "Change Image" 
-                                                : "Select Image"}
-                                    </button>
-                                    
-                                    {showImageOptions && (
-                                        <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-[#0c252a] border border-[#d9ff56]/20 rounded-lg z-10">
-                                            <button
-                                                onClick={handleFileSelect}
-                                                className="w-full p-2 mb-2 rounded-lg font-medium transition-all duration-200 bg-white/10 text-white hover:bg-white/20"
-                                            >
-                                                Select from Files
-                                            </button>
-                                            <button
-                                                onClick={handleCameraCapture}
-                                                className="w-full p-2 rounded-lg font-medium transition-all duration-200 bg-white/10 text-white hover:bg-white/20"
-                                            >
-                                                Take a Picture
-                                            </button>
-                                        </div>
-                                    )}
-                                    
-                                    <input 
-                                        type="file"
-                                        ref={fileInputRef}
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                    />
-                                    
-                                    <input 
-                                        type="file"
-                                        ref={cameraInputRef}
-                                        accept="image/*"
-                                        capture="environment"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                    />
-                                </div>
-                                
-                                {/* Hidden URI input that gets updated when an image is selected */}
-                                <input
-                                    type="hidden"
-                                    value={nftImageURI}
-                                    readOnly
-                                />
-                            </div>
+                            <input
+                                type="text"
+                                value={nftImageURI}
+                                onChange={(e) => setNftImageURI(e.target.value)}
+                                placeholder="ipfs://... or https://..."
+                                className="w-full p-3 bg-white/10 border border-[#d9ff56]/20 rounded-lg focus:ring-2 focus:ring-[#d9ff56] focus:border-transparent transition-all duration-200 text-white placeholder-gray-400"
+                            />
                         </div>
 
                         <div>
