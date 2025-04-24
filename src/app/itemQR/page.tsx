@@ -109,14 +109,8 @@ export default function ItemQRPage() {
 
   // Generate QR code value
   const getQRValue = () => {
-    // The QR should contain essential information about the item
-    return JSON.stringify({
-      id: itemId,
-      name: item?.name,
-      location: item?.currentLocation,
-      lastUpdated: item?.lastUpdated,
-      trackingId: `MY${itemId}4432647064W` // Example tracking ID similar to the POS Malaysia format
-    });
+    // The QR should only contain the token ID
+    return itemId || "";
   };
 
   if (loading) {
