@@ -15,9 +15,11 @@ import Donators from '@/components/pool/Donators';
 import DonatorCount from '@/components/pool/DonatorCount';
 import { PoolLogo } from '@/components/ui/pool-logo';
 import FundAllocation from '@/components/pool/FundAllocation';
+import CreateItemModal from '@/components/pool/CreateItemModal';
+import PoolItems from '@/components/pool/PoolItems';
 
 // Tab types
-type TabType = 'info' | 'progress' | 'donators' | 'fundAllocation';
+type TabType = 'info' | 'progress' | 'donators' | 'fundAllocation' | 'items';
 
 export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
   const { id } = use(params);
@@ -25,6 +27,7 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const { walletProvider } = useAppKitProvider("eip155");
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false);
 
   const fetchPool = useCallback(async () => {
     try {
@@ -53,6 +56,13 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
     fetchPool();
   };
 
+  const handleItemCreated = () => {
+    // Refresh pool data after an item is created
+    fetchPool();
+    // Switch to items tab after creating an item
+    setActiveTab('items');
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
@@ -74,12 +84,23 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
         <div className="text-sm text-blue-600 uppercase font-medium mb-2">
           EQUITY CROWDFUNDING
         </div>
-        <div className="absolute top-4 right-8">
-          <button className="text-gray-600 hover:text-gray-900">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 0m-3.935 0l-9.566-5.314m9.566-4.314a2.25 2.25 0 10-3.935 0m3.935 0l-9.566 5.314" />
-            </svg>
-          </button>
+        <div className="flex justify-end">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsCreateItemModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Create Item
+            </button>
+            <button className="text-gray-600 hover:text-gray-900 p-2 rounded-md">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 0m-3.935 0l-9.566-5.314m9.566-4.314a2.25 2.25 0 10-3.935 0m3.935 0l-9.566 5.314" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -158,6 +179,16 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
                 <DonatorCount poolId={pool.id} />
               </button>
               <button 
+                onClick={() => setActiveTab('items')}
+                className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'items' 
+                    ? 'text-gray-900 border-gray-500' 
+                    : 'text-gray-500 hover:text-gray-700 border-transparent'
+                }`}
+              >
+                Items
+              </button>
+              <button 
                 onClick={() => setActiveTab('fundAllocation')}
                 className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'fundAllocation' 
@@ -190,14 +221,29 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
               </div>
             )}
             
+            {activeTab === 'items' && (
+              <div className="space-y-8">
+                <PoolItems poolId={pool.id} />
+              </div>
+            )}
+            
             {activeTab === 'fundAllocation' && (
               <div className="space-y-8">
                 <FundAllocation />
               </div>
             )}
+            
           </div>
         </div>
       </div>
+
+      {/* Create Item Modal */}
+      <CreateItemModal 
+        isOpen={isCreateItemModalOpen}
+        onClose={() => setIsCreateItemModalOpen(false)}
+        poolId={id}
+        onItemCreated={handleItemCreated}
+      />
     </div>
   );
 }
