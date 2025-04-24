@@ -3,13 +3,34 @@ import { CONTRACT_ADDRESS, RPC_URL } from '@/utils/config';
 import { ethers } from 'ethers';
 import contractAbi from '@/contract/abi.json';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import axios from 'axios';
+
+// Coingecko API key
+const COINGECKO_API_KEY = process.env.NEXT_PUBLIC_COINGECKO_API_KEY || 'CG-Zr3bJVBfewv3VeDDJUkzKMRf';
 
 interface DonateButtonProps {
   poolId: string;
   onSuccess?: () => void;
 }
+
+// Function to get current ETH price in MYR from CoinGecko
+const getEthPriceInMYR = async (): Promise<number> => {
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+      params: {
+        ids: 'ethereum',
+        vs_currencies: 'myr',
+        x_cg_demo_api_key: COINGECKO_API_KEY
+      }
+    });
+    return response.data.ethereum.myr;
+  } catch (error) {
+    console.error('Error fetching ETH price:', error);
+    throw new Error('Failed to fetch ETH price from CoinGecko');
+  }
+};
 
 // Function to get current date in formatted string
 const getCurrentDate = () => {
@@ -24,7 +45,7 @@ const getCurrentDate = () => {
 };
 
 // Function to generate PDF content
-const generatePdfReceipt = (poolId: string, amount: string, bank: string) => {
+const generatePdfReceipt = (poolId: string, amount: string, bank: string, ethAmount: string, ethRate: string) => {
   // Generate a unique receipt ID
   const receiptId = `REC-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   const currentDate = getCurrentDate();
@@ -67,8 +88,16 @@ const generatePdfReceipt = (poolId: string, amount: string, bank: string) => {
               <span>${poolId}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Amount:</span>
+              <span class="info-label">Amount (MYR):</span>
               <span>RM${amount}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Amount (ETH):</span>
+              <span>${ethAmount} ETH</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ETH Rate:</span>
+              <span>RM${ethRate}/ETH</span>
             </div>
             <div class="info-row">
               <span class="info-label">Payment Method:</span>
@@ -97,8 +126,8 @@ const generatePdfReceipt = (poolId: string, amount: string, bank: string) => {
 };
 
 // Function to trigger download of receipt as PDF
-const downloadReceipt = (poolId: string, amount: string, bank: string) => {
-  const receiptHtml = generatePdfReceipt(poolId, amount, bank);
+const downloadReceipt = (poolId: string, amount: string, bank: string, ethAmount: string = '0', ethRate: string = '0') => {
+  const receiptHtml = generatePdfReceipt(poolId, amount, bank, ethAmount, ethRate);
   
   // Create a Blob with the HTML content
   const blob = new Blob([receiptHtml], { type: 'text/html' });
@@ -129,6 +158,9 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>('processing');
   const [verificationClicked, setVerificationClicked] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [ethAmount, setEthAmount] = useState<string>('0');
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
 
   // Bank payment form state
   const [bankDetails, setBankDetails] = useState({
@@ -148,16 +180,53 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
     { id: 'rhb', name: 'RHB', logo: '/banks/rhb-logo.png' },
   ];
 
+  // Fetch ETH price when modal is opened
+  useEffect(() => {
+    if (showModal) {
+      fetchEthPrice();
+    }
+  }, [showModal]);
+
+  // Recalculate ETH amount when MYR amount or ETH price changes
+  useEffect(() => {
+    calculateEthAmount();
+  }, [amount, ethPrice]);
+
+  // Fetch ETH price from CoinGecko
+  const fetchEthPrice = async () => {
+    setIsLoadingPrice(true);
+    try {
+      const price = await getEthPriceInMYR();
+      setEthPrice(price);
+    } catch (error) {
+      console.error('Failed to fetch ETH price:', error);
+      setError('Failed to fetch current ETH price. Please try again later.');
+    } finally {
+      setIsLoadingPrice(false);
+    }
+  };
+
+  // Calculate ETH amount based on MYR amount and current ETH price
+  const calculateEthAmount = () => {
+    if (!amount || !ethPrice || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      setEthAmount('0');
+      return;
+    }
+
+    const amountInMYR = parseFloat(amount);
+    const ethAmountValue = amountInMYR / ethPrice;
+    setEthAmount(ethAmountValue.toFixed(8)); // 8 decimal places for ETH
+  };
+
   // Function to interact with blockchain contract for donation
   const processDonationOnChain = async () => {
     try {
-      // Convert the amount to 4 decimal places (like in ZakatPay)
-      // 100 RM → becomes 1,000,000 units on blockchain (100 × 10^4)
-      const amountInUnits = ethers.parseUnits(amount || '0', 4);
+      // Convert the ETH amount to wei
+      const amountInWei = ethers.parseEther(ethAmount || '0');
       
       // For display purposes
       const displayAmount = amount;
-      console.log(`Converting ${displayAmount} MYR to ${amountInUnits.toString()} units (4 decimal places)`);
+      console.log(`Converting RM${displayAmount} to ${ethAmount} ETH (${amountInWei.toString()} wei) at rate of RM${ethPrice}/ETH`);
       
       // Create provider and connect to the network
       const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -186,9 +255,9 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       console.log("Pool ID to donate to:", poolId);
       
       try {
-        // Call the donate function on the contract with 4 decimal places value
+        // Call the donate function on the contract with ETH value in wei
         const tx = await contract.donate(parseInt(poolId), {
-          value: amountInUnits,
+          value: amountInWei,
           gasLimit: BigInt(300000)
         });
         
@@ -201,7 +270,8 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
         return {
           success: true,
           txHash: tx.hash,
-          displayAmount: displayAmount
+          displayAmount: displayAmount,
+          ethAmount: ethAmount
         };
       } catch (contractError) {
         console.error("Contract call error:", contractError);
@@ -405,8 +475,14 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                     <div className="text-gray-700">Bill account no.:</div>
                     <div className="text-right font-medium">{poolId.padStart(4, '0')}</div>
                     
-                    <div className="text-gray-700">Amount:</div>
+                    <div className="text-gray-700">Amount (MYR):</div>
                     <div className="text-right font-medium">RM{amount}</div>
+                    
+                    <div className="text-gray-700">Amount (ETH):</div>
+                    <div className="text-right font-medium">{ethAmount} ETH</div>
+                    
+                    <div className="text-gray-700">ETH Rate:</div>
+                    <div className="text-right font-medium">RM{ethPrice?.toFixed(2)}/ETH</div>
                     
                     <div className="text-gray-700">Effective date:</div>
                     <div className="text-right font-medium">Today</div>
@@ -457,7 +533,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 {paymentStatus !== 'processing' && (
                   <div className={`p-3 rounded-md mb-6 text-center ${paymentStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {paymentStatus === 'success' 
-                      ? `Donation of RM${amount} recorded successfully!` 
+                      ? `Donation of RM${amount} (${ethAmount} ETH) recorded successfully!` 
                       : 'Payment failed. Please try again.'}
                     
                     {/* Show transaction hash if available */}
@@ -465,7 +541,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                       <div className="mt-2 text-xs break-all">
                         <p>Transaction Hash:</p>
                         <p className="font-mono">{txHash}</p>
-                        <p className="mt-2 text-gray-600">Your donation was processed with 4 decimal places (RM{amount} = {parseInt(amount) * 10000} units)</p>
+                        <p className="mt-2 text-gray-600">Your donation was processed at rate of RM{ethPrice?.toFixed(2)}/ETH</p>
                       </div>
                     )}
                     
@@ -483,7 +559,13 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 {paymentStatus === 'success' && (
                   <div className="mb-6">
                     <button
-                      onClick={() => downloadReceipt(poolId, amount, selectedBank ? banks.find(b => b.id === selectedBank)?.name || 'Bank' : 'Bank')}
+                      onClick={() => downloadReceipt(
+                        poolId, 
+                        amount, 
+                        selectedBank ? banks.find(b => b.id === selectedBank)?.name || 'Bank' : 'Bank',
+                        ethAmount,
+                        ethPrice?.toFixed(2) || '0'
+                      )}
                       className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -536,7 +618,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 
                 <div className="mt-4 px-4">
                   <p className="text-sm text-gray-500 mb-3 text-center">
-                    Enter the amount you want to donate
+                    Enter the amount you want to donate (in MYR)
                   </p>
                   <input
                     type="number"
@@ -547,6 +629,31 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                     step="1"
                     min="1"
                   />
+                  
+                  {/* Show ETH equivalent */}
+                  {ethPrice && amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
+                    <div className="mt-2 text-sm text-gray-600 flex justify-between items-center px-1">
+                      <span>Equivalent in ETH:</span>
+                      <span className="font-medium">≈ {ethAmount} ETH</span>
+                    </div>
+                  )}
+                  
+                  {isLoadingPrice && (
+                    <p className="mt-2 text-xs text-gray-500 text-center">Loading current ETH price...</p>
+                  )}
+                  
+                  {ethPrice && (
+                    <p className="mt-1 text-xs text-gray-500 text-center">
+                      Current ETH price: RM{ethPrice.toFixed(2)}/ETH
+                      <button 
+                        onClick={fetchEthPrice} 
+                        className="ml-2 text-blue-500 hover:text-blue-700"
+                        disabled={isLoadingPrice}
+                      >
+                        {isLoadingPrice ? 'Updating...' : '↻'}
+                      </button>
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4 px-4">

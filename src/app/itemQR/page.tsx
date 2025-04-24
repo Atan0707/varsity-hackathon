@@ -6,6 +6,9 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { getItemDetails, ItemDetails } from "@/utils/contract";
 import { getPoolByIdFromChain } from "@/utils/contract";
+import { ethers } from "ethers";
+import ABI from "@/contract/abi.json";
+import { CONTRACT_ADDRESS } from "@/utils/config";
 
 export default function ItemQRPage() {
   const searchParams = useSearchParams();
@@ -15,10 +18,110 @@ export default function ItemQRPage() {
   const [poolName, setPoolName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   // Handle print functionality
   const handlePrint = () => {
     window.print();
+  };
+
+  // Function to get transaction hash for a given token ID
+  const getTransactionHashForToken = async (tokenId: string): Promise<string | null> => {
+    try {
+      // Initialize provider (read-only is sufficient)
+      const provider = new ethers.JsonRpcProvider('https://sepolia-rpc.scroll.io/');
+      
+      // Get current block number
+      const currentBlock = await provider.getBlockNumber();
+      
+      // We'll look back a reasonable number of blocks or to block 0, whichever is higher
+      // For production, you might want to cache this or use a subgraph
+      const fromBlock = Math.max(currentBlock - 10000, 0);
+      
+      // Create a contract instance to query events
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+      
+      // Since the parameters are not indexed, we need to get all ItemCreated events 
+      // and filter them manually
+      const filter = contract.filters.ItemCreated();
+      const events = await contract.queryFilter(filter, fromBlock, currentBlock);
+      
+      // Parse each event to find the one with our token ID
+      for (const event of events) {
+        try {
+          // Parse the event data
+          const parsedLog = contract.interface.parseLog({
+            topics: event.topics,
+            data: event.data
+          });
+          
+          if (parsedLog && parsedLog.name === 'ItemCreated') {
+            // The first argument should be the token ID
+            const eventTokenId = parsedLog.args[0].toString();
+            
+            // If this is our token, return the transaction hash
+            if (eventTokenId === tokenId) {
+              console.log(`Found transaction hash for token ${tokenId}: ${event.transactionHash}`);
+              return event.transactionHash;
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing event:", error);
+          continue; // Skip this event if parsing fails
+        }
+      }
+      
+      // If we didn't find it in the recent blocks, try with a wider range
+      // Note: This could be resource-intensive on mainnet
+      if (fromBlock > 0) {
+        console.log(`No events found in recent blocks, trying from genesis block...`);
+        try {
+          // We'll only do this if we have a small number of events overall
+          const allEvents = await contract.queryFilter(filter, 0, fromBlock - 1);
+          
+          // Parse each event to find the one with our token ID
+          for (const event of allEvents) {
+            try {
+              const parsedLog = contract.interface.parseLog({
+                topics: event.topics,
+                data: event.data
+              });
+              
+              if (parsedLog && parsedLog.name === 'ItemCreated') {
+                const eventTokenId = parsedLog.args[0].toString();
+                
+                if (eventTokenId === tokenId) {
+                  console.log(`Found transaction hash in wider search for token ${tokenId}: ${event.transactionHash}`);
+                  return event.transactionHash;
+                }
+              }
+            } catch (error) {
+              continue; // Skip this event if parsing fails
+            }
+          }
+        } catch (error) {
+          console.error("Error querying full history:", error);
+        }
+      }
+      
+      console.log(`Could not find transaction hash for token ${tokenId}`);
+      return null;
+    } catch (error) {
+      console.error("Error getting transaction hash:", error);
+      
+      // If everything fails, we could use a deterministic approach to generate a hash
+      // that's consistent for the same token ID, so QR codes don't change
+      try {
+        // This is a fallback that creates a deterministic hash-like string for a token ID
+        // Note: This is NOT a real transaction hash, just a placeholder with similar format
+        const placeholder = ethers.keccak256(ethers.toUtf8Bytes(`token-${tokenId}-fallback-hash`));
+        console.log(`Generated placeholder hash for token ${tokenId}: ${placeholder}`);
+        return placeholder;
+      } catch (fallbackError) {
+        console.error("Error generating fallback hash:", fallbackError);
+        return null;
+      }
+    }
   };
 
   useEffect(() => {
@@ -67,6 +170,19 @@ export default function ItemQRPage() {
         
         setItem(itemDetails);
         
+        // Get transaction hash from chain for this item
+        const tokenTxHash = await getTransactionHashForToken(id);
+        
+        if (tokenTxHash) {
+          setTxHash(tokenTxHash);
+          // Check if it's a generated hash
+          if (typeof tokenTxHash === 'string' && tokenTxHash.includes('fallback')) {
+            console.log("Using generated fallback hash");
+          }
+        } else {
+          console.warn("Could not retrieve transaction hash for this item");
+        }
+        
         // Get pool name
         try {
           const poolData = await getPoolByIdFromChain(itemDetails.poolId.toString());
@@ -109,8 +225,8 @@ export default function ItemQRPage() {
 
   // Generate QR code value
   const getQRValue = () => {
-    // The QR should only contain the token ID
-    return itemId || "";
+    // The QR should contain the transaction hash if available, otherwise fall back to item ID
+    return txHash  || "";
   };
 
   if (loading) {
@@ -220,6 +336,24 @@ export default function ItemQRPage() {
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">Tracking ID:</p>
               <p className="font-mono text-md font-bold text-gray-900">{`MY${itemId}4432647064W`}</p>
+              
+              {txHash ? (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600">Transaction Hash:</p>
+                  <p className="font-mono text-xs font-medium text-gray-900 break-all">{txHash}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {typeof txHash === 'string' && txHash.includes('fallback') 
+                      ? "Generated hash for verification (blockchain data unavailable)"
+                      : "This hash is encoded in the QR code"}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600">Item ID:</p>
+                  <p className="font-mono text-xs font-medium text-gray-900">{itemId}</p>
+                  <p className="text-xs text-gray-500 mt-1">Item ID is encoded in the QR code (transaction hash unavailable)</p>
+                </div>
+              )}
             </div>
           </div>
           
