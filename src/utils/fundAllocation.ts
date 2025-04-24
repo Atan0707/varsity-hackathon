@@ -4,6 +4,7 @@ export interface FundAllocation {
   nftName: string;
   percentage: number;
   description: string;
+  quantity?: number;
 }
 
 export const getFundAllocations = (): FundAllocation[] => {

@@ -3,27 +3,32 @@
     {
       "nftName": "T-Shirt Support ",
       "percentage": 20,
-      "description": "Providing essential clothing support to those in need"
+      "description": "Providing essential clothing support to those in need",
+      "quantity": 500
     },
     {
       "nftName": "Drink Supply ",
       "percentage": 15,
-      "description": "Ensuring access to clean and safe drinking supplies"
+      "description": "Ensuring access to clean and safe drinking supplies",
+      "quantity": 300
     },
     {
       "nftName": "Med Kit ",
       "percentage": 25,
-      "description": "Supporting medical and first aid supplies distribution"
+      "description": "Supporting medical and first aid supplies distribution",
+      "quantity": 200
     },
     {
       "nftName": "Education Support ",
       "percentage": 20,
-      "description": "Funding educational resources and learning materials"
+      "description": "Funding educational resources and learning materials",
+      "quantity": 150
     },
     {
       "nftName": "Water Supply ",
       "percentage": 20,
-      "description": "Supporting clean water infrastructure and distribution"
+      "description": "Supporting clean water infrastructure and distribution",
+      "quantity": 400
     }
   ]
 } 
