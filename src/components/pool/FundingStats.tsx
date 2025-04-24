@@ -161,14 +161,14 @@ const FundingStats: React.FC<FundingStatsProps> = ({
         </div>
 
         <div>
-          {status === 'Live' ? (
+          {status === 'Live' && daysLeft > 0 ? (
             <DonateButton poolId={poolId} onSuccess={handleDonationSuccess} />
           ) : (
             <button 
               disabled
               className="w-full py-3 px-4 bg-gray-400 text-white font-medium rounded-md cursor-not-allowed opacity-70"
             >
-              Donation Closed
+              {status !== 'Live' ? 'Donation Closed' : 'Campaign Ended'}
             </button>
           )}
         </div>

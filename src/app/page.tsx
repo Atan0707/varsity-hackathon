@@ -194,6 +194,8 @@ export default function Home() {
                     <div className="p-6">
                       <h3 className="text-xl font-light text-[#0c252a] mb-2 font-proto">{pool.title}</h3>
                       
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">{pool.description}</p>
+                      
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-bold text-[#0c252a]">{formatCurrency(pool.currentAmount)}</div>
                         <div className="text-sm text-gray-500">

@@ -160,13 +160,7 @@ export default function Navbar() {
           {/* Right side links/buttons */}
           <div className="flex items-center space-x-4 md:space-x-6">
             <div className="hidden lg:block">
-              <Link
-                href="/"
-                className={`text-[#ed6400] hover:text-[rgba(15,45,50,0.8)] font-medium transition-colors pb-1
-                  ${pathname === "/support" ? "border-b-[3px] border-[rgba(15,45,50,255)]" : ""}`}
-              >
-                Support Center
-              </Link>
+             
             </div>
 
             {mounted && (
