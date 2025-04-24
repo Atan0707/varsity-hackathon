@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESS, RPC_URL } from "@/utils/config";
 import ABI from "../../contract/abi.json";
 import axios from 'axios';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // Define the GeolocationPosition type as a regular type instead of an empty interface
 type GeolocationPositionExtended = GeolocationPosition;
@@ -34,6 +35,7 @@ export default function CreateItemModal({ isOpen, onClose, poolId, onItemCreated
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const router = useRouter();
 
   // Check if camera is available
   useEffect(() => {
@@ -313,6 +315,25 @@ export default function CreateItemModal({ isOpen, onClose, poolId, onItemCreated
       // Get transaction hash
       const transactionHash = receipt.hash;
       
+      // Parse logs to get tokenId (this is based on the ItemCreated event)
+      let tokenId = null;
+      if (receipt.logs && receipt.logs.length > 0) {
+        try {
+          // The ItemCreated event has the tokenId as the first indexed parameter (after the topics[0] which is the event signature)
+          const log = receipt.logs.find(
+            (log: ethers.Log) => log.topics && log.topics[0] === ethers.id("ItemCreated(uint256,string,uint256)").substring(0, 66)
+          );
+          
+          if (log && log.topics && log.topics.length > 1) {
+            // The second topic (index 1) contains the tokenId
+            tokenId = parseInt(log.topics[1], 16);
+            console.log("Created Token ID:", tokenId);
+          }
+        } catch (logError) {
+          console.error("Error parsing logs:", logError);
+        }
+      }
+      
       setTransactionStatus("Transaction confirmed!");
       setTxProgress(100);
       
@@ -324,6 +345,38 @@ export default function CreateItemModal({ isOpen, onClose, poolId, onItemCreated
       // Close the modal after a short delay to show completion
       setTimeout(() => {
         onClose();
+        
+        // Redirect to itemQR page with the tokenId
+        if (tokenId) {
+          router.push(`/itemQR?id=${tokenId}`);
+        } else {
+          // Fallback: try to get the latest token ID from the contract
+          try {
+            // Since we don't have direct access to the most recent tokenId,
+            // we can use the poolId to check items in this pool
+            const fetchLatestItem = async () => {
+              try {
+                const items = await contract.getPoolItems(parseInt(poolId));
+                if (items && items.length > 0) {
+                  // Get the most recent item (last one in the array)
+                  const latestItemId = Number(items[items.length - 1]);
+                  router.push(`/itemQR?id=${latestItemId}`);
+                } else {
+                  // If no items are found, just redirect to the pool page
+                  router.push(`/pool/${poolId}`);
+                }
+              } catch (fetchError) {
+                console.error("Error fetching latest item:", fetchError);
+                router.push(`/pool/${poolId}`);
+              }
+            };
+            fetchLatestItem();
+          } catch (error) {
+            console.error("Error in fallback redirect:", error);
+            // If all else fails, go back to the pool page
+            router.push(`/pool/${poolId}`);
+          }
+        }
       }, 1500);
     } catch (err) {
       console.error("Error creating item:", err);

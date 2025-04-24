@@ -275,4 +275,47 @@ export const getPoolDonators = async (poolId: string): Promise<Donator[]> => {
     console.error('Error getting pool donators:', error);
     return [];
   }
+};
+
+export interface ItemDetails {
+  name: string;
+  imageURI: string;
+  poolId: number;
+  currentLocation: string;
+  delivered: boolean;
+  lastUpdated: number;
+}
+
+export const getItemDetails = async (tokenId: string): Promise<ItemDetails | null> => {
+  try {
+    const contract = getReadOnlyContract();
+    
+    try {
+      // Call the getItemDetails function from the smart contract
+      const [name, imageURI, poolId, currentLocation, delivered, lastUpdated] = 
+        await contract.getItemDetails(tokenId);
+      
+      // Check if we got empty data (non-existent token)
+      if (!name && !imageURI && Number(poolId) === 0) {
+        console.log('Item does not exist');
+        return null;
+      }
+      
+      return {
+        name,
+        imageURI,
+        poolId: Number(poolId),
+        currentLocation,
+        delivered,
+        lastUpdated: Number(lastUpdated) * 1000 // Convert from seconds to milliseconds
+      };
+    } catch (contractError) {
+      // This is likely a revert from the contract - token doesn't exist
+      console.error('Contract error getting item details:', contractError);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error getting item details:', error);
+    return null;
+  }
 }; 
