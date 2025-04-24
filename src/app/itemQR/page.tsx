@@ -96,6 +96,7 @@ export default function ItemQRPage() {
                 }
               }
             } catch (error) {
+              console.error("Error parsing event:", error);
               continue; // Skip this event if parsing fails
             }
           }
