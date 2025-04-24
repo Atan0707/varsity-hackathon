@@ -8,6 +8,113 @@ interface DonateButtonProps {
   onSuccess?: () => void;
 }
 
+// Function to get current date in formatted string
+const getCurrentDate = () => {
+  const date = new Date();
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Function to generate PDF content
+const generatePdfReceipt = (poolId: string, amount: string, bank: string) => {
+  // Generate a unique receipt ID
+  const receiptId = `REC-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  const currentDate = getCurrentDate();
+  
+  // Create a simple HTML template for the receipt
+  const receiptHtml = `
+    <html>
+      <head>
+        <title>Donation Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; }
+          .receipt { max-width: 800px; margin: 0 auto; border: 1px solid #eee; padding: 30px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .header h1 { margin: 0; color: #2b5329; }
+          .info { margin-bottom: 30px; }
+          .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+          .info-label { font-weight: bold; }
+          .footer { margin-top: 50px; text-align: center; font-size: 14px; color: #888; }
+          .official { margin-top: 40px; border-top: 2px dashed #eee; padding-top: 20px; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="header">
+            <h1>Donation Receipt</h1>
+            <p>Thank you for your contribution</p>
+          </div>
+          
+          <div class="info">
+            <div class="info-row">
+              <span class="info-label">Receipt ID:</span>
+              <span>${receiptId}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Date:</span>
+              <span>${currentDate}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Pool ID:</span>
+              <span>${poolId}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Amount:</span>
+              <span>RM${amount}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Payment Method:</span>
+              <span>FPX - ${bank}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status:</span>
+              <span>Completed</span>
+            </div>
+          </div>
+          
+          <div class="official">
+            <p>This is an official receipt of your donation.</p>
+            <p>Thank you for your generosity!</p>
+          </div>
+          
+          <div class="footer">
+            <p>For questions or concerns, please contact support@crowdfunding-example.com</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  return receiptHtml;
+};
+
+// Function to trigger download of receipt as PDF
+const downloadReceipt = (poolId: string, amount: string, bank: string) => {
+  const receiptHtml = generatePdfReceipt(poolId, amount, bank);
+  
+  // Create a Blob with the HTML content
+  const blob = new Blob([receiptHtml], { type: 'text/html' });
+  
+  // Create a download link
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `donation-receipt-${poolId}.html`;
+  
+  // Trigger download
+  document.body.appendChild(link);
+  link.click();
+  
+  // Clean up
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +124,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   const [selectedBank, setSelectedBank] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'processing' | 'success' | 'failed'>('processing');
+  const [verificationClicked, setVerificationClicked] = useState(false);
 
   // Bank payment form state
   const [bankDetails, setBankDetails] = useState({
@@ -63,20 +171,11 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
         // Show the confirmation screen first
         setShowConfirmation(true);
         setPaymentStatus('processing');
+        // Reset verification clicked state when starting a new donation
+        setVerificationClicked(false);
         
-        // Simulate FPX processing
-        setTimeout(() => {
-          setIsLoading(false);
-          setPaymentStatus('success');
-          
-          // Close everything after 3 seconds on success
-          setTimeout(() => {
-            setShowConfirmation(false);
-            setShowModal(false);
-            setAmount('');
-            if (onSuccess) onSuccess();
-          }, 3000);
-        }, 2500);
+        // Processing times are now managed in the confirmation button click handler
+        setIsLoading(false);
       } catch (err) {
         console.error('Donation error:', err);
         setError('Failed to process payment: ' + (err instanceof Error ? err.message : String(err)));
@@ -97,21 +196,16 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       // Show the confirmation screen first
       setShowConfirmation(true);
       setPaymentStatus('processing');
+      // Reset verification clicked state when starting a new donation
+      setVerificationClicked(false);
       
-      // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
-        setPaymentStatus('success');
-        
-        // Close everything after 3 seconds on success
-        setTimeout(() => {
-          setShowConfirmation(false);
-          setShowModal(false);
-          setAmount('');
-          if (onSuccess) onSuccess();
-        }, 3000);
-      }, 2500);
+      // We'll let the confirmation button handle the rest of the process
+      setIsLoading(false);
     }
+  }
+  
+  const handleSecureVerificationClick = () => {
+    setVerificationClicked(true);
   };
   
   // Handle "Go back" action from confirmation screen
@@ -160,14 +254,14 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 {/* Payment Details */}
                 <div className="border rounded-md p-4 mb-6">
                   <div className="grid grid-cols-2 gap-y-3">
-                    <div className="text-gray-700">From Account:</div>
-                    <div className="text-right font-medium">SA-i</div>
                     
-                    <div className="text-gray-700">Corporation Name:</div>
-                    <div className="text-right font-medium">Zakat System</div>
+                    
+                    
+                    <div className="text-gray-700">Organization:</div>
+                    <div className="text-right font-medium">Fund</div>
                     
                     <div className="text-gray-700">Bill account no.:</div>
-                    <div className="text-right font-medium">ZKT-{poolId.padStart(4, '0')}</div>
+                    <div className="text-right font-medium">{poolId.padStart(4, '0')}</div>
                     
                     <div className="text-gray-700">Amount:</div>
                     <div className="text-right font-medium">RM{amount}</div>
@@ -187,11 +281,14 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                 </div>
                 
                 {/* Secure Verification */}
-                <div className="bg-[#fffce3] p-4 rounded-md mb-6">
+                <div 
+                  className={`bg-[#fffce3] p-4 rounded-md mb-6 cursor-pointer transition ${!verificationClicked ? 'hover:bg-[#fff9d1]' : ''}`} 
+                  onClick={!verificationClicked && paymentStatus === 'processing' ? handleSecureVerificationClick : undefined}
+                >
                   <div className="flex items-start">
                     <div className="mr-2">
-                      <div className="w-5 h-5 rounded-full border-2 border-blue-500 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div className={`w-5 h-5 rounded-full border-2 ${verificationClicked ? 'border-green-500' : 'border-gray-400'} flex items-center justify-center`}>
+                        <div className={`w-2 h-2 ${verificationClicked ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
                       </div>
                     </div>
                     <div>
@@ -200,7 +297,9 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                         <span className="ml-1 text-white bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">i</span>
                       </div>
                       <p className="text-sm mt-1">
-                        {paymentStatus === 'processing' ? (
+                        {!verificationClicked && paymentStatus === 'processing' ? (
+                          "Click here to authorize this transaction"
+                        ) : paymentStatus === 'processing' ? (
                           "You will receive a notification on your phone to authorise this transaction on the new Maybank app."
                         ) : paymentStatus === 'success' ? (
                           "Your transaction has been authorized and completed successfully."
@@ -221,13 +320,44 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                   </div>
                 )}
                 
+                {/* Download Receipt Button - Only show after successful payment */}
+                {paymentStatus === 'success' && (
+                  <div className="mb-6">
+                    <button
+                      onClick={() => downloadReceipt(poolId, amount, selectedBank ? banks.find(b => b.id === selectedBank)?.name || 'Bank' : 'Bank')}
+                      className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                      Download Receipt
+                    </button>
+                  </div>
+                )}
+                
                 {/* Action Buttons */}
                 <div className="flex justify-center items-center space-x-4">
                   {paymentStatus === 'processing' ? (
                     <>
                       <button
-                        className={`px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e6b800]'}`}
-                        disabled={isLoading}
+                        onClick={() => {
+                          setIsLoading(true);
+                          // Simulate FPX processing - increased processing time
+                          setTimeout(() => {
+                            setIsLoading(false);
+                            setPaymentStatus('success');
+                            
+                            // Close everything after 5 seconds on success
+                            setTimeout(() => {
+                              setShowConfirmation(false);
+                              setShowModal(false);
+                              setAmount('');
+                              if (onSuccess) onSuccess();
+                            }, 5000);
+                          }, 4000);
+                        }}
+                        className={`px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md ${!verificationClicked || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e6b800]'}`}
+                        disabled={!verificationClicked || isLoading}
                       >
                         {isLoading ? 'Processing...' : 'Confirm'}
                       </button>
@@ -248,6 +378,12 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                     </button>
                   )}
                 </div>
+
+                {!verificationClicked && paymentStatus === 'processing' && (
+                  <div className="text-center mt-3 text-sm text-amber-700">
+                    Please click on Secure Verification above to continue
+                  </div>
+                )}
               </div>
             ) : (
               // Original Payment Options Screen
