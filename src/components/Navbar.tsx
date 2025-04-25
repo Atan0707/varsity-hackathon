@@ -272,13 +272,7 @@ export default function Navbar() {
                 >
                   Pool
                 </Link>
-                <Link
-                  href="/dao"
-                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  DAO
-                </Link>
+               
                 {/* <Link
                   href="/mintItem"
                   className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
@@ -286,13 +280,7 @@ export default function Navbar() {
                 >
                   Mint
                 </Link> */}
-                <Link
-                  href="/"
-                  className="block px-4 py-3 text-[rgba(15,45,50,255)] font-medium text-lg hover:bg-[rgba(15,45,50,0.1)] rounded-lg"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Support Center
-                </Link>
+                
               </div>
 
               {/* Mobile Connect Button */}
