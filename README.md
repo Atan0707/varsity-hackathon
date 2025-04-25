@@ -82,6 +82,28 @@ GlassFund introduces a new model for charity donations where:
 - Yarn package manager
 - MetaMask or compatible wallet with Scroll Network configured
 
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+# For geocoding and location services (get from https://opencagedata.com/)
+NEXT_PUBLIC_OPENCAGE_API_KEY=your_opencage_api_key
+
+# Blockchain private key (IMPORTANT: Keep this secure!)
+NEXT_PUBLIC_PRIVATE_KEY=your_private_key
+
+# Pinata IPFS for NFT metadata storage (get from https://www.pinata.cloud/)
+NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
+NEXT_PUBLIC_PINATA_API_SECRET=your_pinata_api_secret
+NEXT_PUBLIC_PINATA_JWT=your_pinata_jwt_token
+
+# CoinGecko API for cryptocurrency price data (get from https://www.coingecko.com/)
+NEXT_PUBLIC_COINGECKO_API_KEY=your_coingecko_api_key
+```
+
+For the Raspberry Pi implementation, update constants in `src/raspberryPi/main.py`:
+
 ### Installation
 
 1. Clone the repository:
