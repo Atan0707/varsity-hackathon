@@ -119,25 +119,27 @@ export default function PoolsListPage() {
           <p className="ml-4 text-lg text-gray-600">Loading pool data from blockchain...</p>
         </div>
       ) : pools.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar md:grid md:grid-cols-3 md:gap-6">
           {pools.map((pool) => (
             <Link 
               key={pool.id} 
               href={`/pool/${pool.id}`} 
-              className="block bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-md transition-all transform hover:-translate-y-1"
+              className="block bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-md transition-all transform hover:-translate-y-1 min-w-[280px] w-[280px] flex-shrink-0 md:w-auto"
             >
               <div className="relative">
                 <PoolLogo
                   logoUrl={pool.logoUrl}
                   title={pool.title}
                   width={400}
-                  height={220}
-                  className="w-full h-[220px] object-cover rounded-t-2xl"
-                  containerClassName="w-full h-[220px]"
+                  height={180}
+                  className="w-full h-[180px] object-cover rounded-t-2xl"
+                  containerClassName="w-full h-[180px]"
                 />
-                <div className="absolute top-3 right-3 bg-[#0c252a]/80 text-white text-xs font-medium px-2 py-1 rounded-full">
-                  {pool.status}
-                </div>
+                {pool.daysLeft > 0 && (
+                  <div className="absolute top-3 right-3 bg-[#0c252a]/80 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    Live
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h2 className="text-xl font-bold text-[#172B4D] mb-3">{pool.title}</h2>
