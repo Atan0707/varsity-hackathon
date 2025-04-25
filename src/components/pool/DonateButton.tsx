@@ -165,6 +165,10 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
     targetAmount: string;
     totalDonated: string;
     remainingAmount: string;
+    targetAmountWei?: string;
+    totalDonatedWei?: string;
+    remainingWei?: string;
+    remainingAmountMYR?: string;
   } | null>(null);
   const [isPoolDetailsLoading, setIsPoolDetailsLoading] = useState(false);
 
@@ -220,15 +224,36 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       // Call getPoolDetails function
       const details = await contract.getPoolDetails(parseInt(poolId));
       
-      // Format values from wei to ETH (or appropriate unit)
-      const targetAmount = ethers.formatEther(details[4]);
-      const totalDonated = ethers.formatEther(details[6]);
-      const remainingAmount = (parseFloat(targetAmount) - parseFloat(totalDonated)).toString();
+      // Get the raw wei values
+      const targetAmountWei = details[4];
+      const totalDonatedWei = details[6];
+      
+      // Calculate remaining amount in wei
+      const remainingWei = targetAmountWei - totalDonatedWei;
+      
+      // Convert to ETH strings, but keep the precise wei values for calculations
+      const targetAmount = ethers.formatEther(targetAmountWei);
+      const totalDonated = ethers.formatEther(totalDonatedWei);
+      const remainingAmount = ethers.formatEther(remainingWei);
+      
+      console.log('Target:', targetAmount, 'ETH');
+      console.log('Donated:', totalDonated, 'ETH');
+      console.log('Remaining:', remainingAmount, 'ETH');
+      
+      // If ETH price is available, convert remaining ETH to MYR
+      let remainingAmountMYR = '0';
+      if (ethPrice) {
+        remainingAmountMYR = (parseFloat(remainingAmount) * ethPrice).toFixed(2);
+      }
       
       setPoolDetails({
         targetAmount,
         totalDonated,
         remainingAmount,
+        targetAmountWei: targetAmountWei.toString(),
+        totalDonatedWei: totalDonatedWei.toString(),
+        remainingWei: remainingWei.toString(),
+        remainingAmountMYR
       });
       
     } catch (error) {
@@ -245,6 +270,15 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
     try {
       const price = await getEthPriceInMYR();
       setEthPrice(price);
+      
+      // Update remainingAmountMYR when ETH price changes
+      if (poolDetails) {
+        const remainingAmountMYR = (parseFloat(poolDetails.remainingAmount) * price).toFixed(2);
+        setPoolDetails({
+          ...poolDetails,
+          remainingAmountMYR
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch ETH price:', error);
       setError('Failed to fetch current ETH price. Please try again later.');
@@ -255,19 +289,19 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
 
   // Handle preset amount selection
   const handlePresetAmount = (presetAmount: string) => {
-    if (!poolDetails) return;
+    if (!poolDetails || !ethPrice) return;
     
     if (presetAmount === 'max') {
-      // Set to remaining amount (target - collected)
-      setAmount(poolDetails.remainingAmount);
+      // Set to remaining amount in MYR
+      setAmount(poolDetails.remainingAmountMYR || '0');
     } else {
-      // Check if preset amount exceeds remaining amount
+      // Check if preset amount exceeds remaining amount in MYR
       const amountValue = parseFloat(presetAmount);
-      const remainingValue = parseFloat(poolDetails.remainingAmount);
+      const remainingValue = parseFloat(poolDetails.remainingAmountMYR || '0');
       
       if (amountValue > remainingValue) {
         // If preset exceeds remaining, set to remaining amount
-        setAmount(remainingValue.toString());
+        setAmount(poolDetails.remainingAmountMYR || '0');
       } else {
         setAmount(presetAmount);
       }
@@ -289,12 +323,30 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   // Function to interact with blockchain contract for donation
   const processDonationOnChain = async () => {
     try {
+      if (!ethAmount || !poolDetails) {
+        return {
+          success: false,
+          error: "Invalid donation amount or pool details not available"
+        };
+      }
+      
       // Convert the ETH amount to wei
       const amountInWei = ethers.parseEther(ethAmount || '0');
+      
+      // Ensure we don't exceed the remaining amount
+      const remainingWei = BigInt(poolDetails.remainingWei || '0');
+      if (amountInWei > remainingWei) {
+        console.log(`Amount exceeds remaining: ${amountInWei} > ${remainingWei}`);
+        return {
+          success: false,
+          error: "Donation amount exceeds the remaining available amount"
+        };
+      }
       
       // For display purposes
       const displayAmount = amount;
       console.log(`Converting RM${displayAmount} to ${ethAmount} ETH (${amountInWei.toString()} wei) at rate of RM${ethPrice}/ETH`);
+      console.log(`Remaining pool amount: ${ethers.formatEther(remainingWei)} ETH (${remainingWei.toString()} wei)`);
       
       // Create provider and connect to the network
       const provider = new ethers.JsonRpcProvider(RPC_URL);
@@ -314,6 +366,14 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       const walletBalance = await provider.getBalance(wallet.address);
       console.log("Wallet balance:", ethers.formatEther(walletBalance), "ETH");
       
+      if (walletBalance < amountInWei) {
+        console.error("Insufficient wallet balance");
+        return {
+          success: false,
+          error: "Insufficient wallet balance to complete the transaction"
+        };
+      }
+      
       // Create the contract instance with proper connection
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, wallet);
       
@@ -321,6 +381,7 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       console.log("Contract address:", CONTRACT_ADDRESS);
       console.log("Wallet address:", wallet.address);
       console.log("Pool ID to donate to:", poolId);
+      console.log("Donation amount in wei:", amountInWei.toString());
       
       try {
         // Call the donate function on the contract with ETH value in wei
@@ -335,6 +396,10 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
         const receipt = await tx.wait();
         
         console.log("Transaction confirmed:", receipt);
+        
+        // After successful donation, refresh the pool details
+        await fetchPoolDetails();
+        
         return {
           success: true,
           txHash: tx.hash,
@@ -695,8 +760,9 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                         // Determine if button should be disabled
                         const isDisabled = isPoolDetailsLoading || 
                           !poolDetails || 
+                          !ethPrice ||
                           (preset.value !== 'max' && 
-                            parseFloat(preset.value) > parseFloat(poolDetails?.remainingAmount || '0'));
+                            parseFloat(preset.value) > parseFloat(poolDetails?.remainingAmountMYR || '0'));
                         
                         return (
                           <button
@@ -720,9 +786,10 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                       onChange={(e) => {
                         const inputValue = e.target.value;
                         
-                        // Ensure amount doesn't exceed remaining amount
-                        if (poolDetails && parseFloat(inputValue) > parseFloat(poolDetails.remainingAmount)) {
-                          setAmount(poolDetails.remainingAmount);
+                        // Ensure amount doesn't exceed remaining amount in MYR
+                        if (poolDetails && poolDetails.remainingAmountMYR && 
+                            parseFloat(inputValue) > parseFloat(poolDetails.remainingAmountMYR)) {
+                          setAmount(poolDetails.remainingAmountMYR);
                         } else {
                           setAmount(inputValue);
                         }
@@ -731,25 +798,25 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
                       step="1"
                       min="1"
-                      max={poolDetails?.remainingAmount}
+                      max={poolDetails?.remainingAmountMYR}
                     />
                     
                     {/* Pool details information */}
                     {isPoolDetailsLoading ? (
                       <p className="mt-2 text-xs text-gray-500 text-center">Loading pool details...</p>
-                    ) : poolDetails && (
+                    ) : poolDetails && ethPrice && (
                       <div className="mt-2 text-xs text-gray-500">
                         <div className="flex justify-between items-center">
                           <span>Target amount:</span>
-                          <span>{parseFloat(poolDetails.targetAmount).toFixed(2)} ETH</span>
+                          <span>{parseFloat(poolDetails.targetAmount).toFixed(2)} ETH (≈RM{(parseFloat(poolDetails.targetAmount) * ethPrice).toFixed(2)})</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span>Total collected:</span>
-                          <span>{parseFloat(poolDetails.totalDonated).toFixed(2)} ETH</span>
+                          <span>{parseFloat(poolDetails.totalDonated).toFixed(2)} ETH (≈RM{(parseFloat(poolDetails.totalDonated) * ethPrice).toFixed(2)})</span>
                         </div>
                         <div className="flex justify-between items-center font-medium">
                           <span>Remaining:</span>
-                          <span>{parseFloat(poolDetails.remainingAmount).toFixed(2)} ETH</span>
+                          <span>{parseFloat(poolDetails.remainingAmount).toFixed(2)} ETH (≈RM{poolDetails.remainingAmountMYR})</span>
                         </div>
                       </div>
                     )}
