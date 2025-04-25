@@ -19,14 +19,8 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
   // Get the donations array from the response
   const donations = data || [];
 
-  // Calculate the unique donator count by filtering unique donor addresses
-  const uniqueDonators = React.useMemo(() => {
-    if (!donations.length) return 0;
-    
-    // Use a Set to count unique donor addresses
-    const uniqueDonorAddresses = new Set(donations.map(donation => donation.donor));
-    return uniqueDonorAddresses.size;
-  }, [donations]);
+  // Get total donations count
+  const totalDonations = donations.length;
 
   // Format the timestamp to a human-readable date
   const formatTimestamp = (timestamp: string) => {
@@ -60,7 +54,7 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
       <div className="flex justify-between items-center mb-6 border-b pb-4">
         <h2 className="text-2xl font-bold">Recent Donators</h2>
         <div className="text-sm text-gray-600">
-          Total <span className="font-semibold">{uniqueDonators}</span> donators
+          Total <span className="font-semibold">{totalDonations}</span> donations
         </div>
       </div>
       
