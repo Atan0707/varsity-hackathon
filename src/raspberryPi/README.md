@@ -23,7 +23,7 @@ This system uses a Raspberry Pi to track items as they move through different lo
 2. Update the constants in `main.py` with your blockchain information:
 
    ```python
-   BLOCKCHAIN_URL = "YOUR_BLOCKCHAIN_URL"
+   RPC_URL = "YOUR_RPC_URL"
    PRIVATE_KEY = "YOUR_PRIVATE_KEY"
    CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"
    ```

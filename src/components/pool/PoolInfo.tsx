@@ -26,7 +26,9 @@ const PoolInfo: React.FC<PoolInfoProps> = ({ pool }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Status:</span>
-                <span className="text-green-600 font-medium">{pool.status}</span>
+                <span className={`font-medium ${pool.daysLeft > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {pool.daysLeft > 0 ? 'Live' : 'Ended'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Target:</span>

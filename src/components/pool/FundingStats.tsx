@@ -134,20 +134,20 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     <div className="w-full h-full bg-white p-6 rounded-lg shadow-sm flex flex-col">
       <div className="flex items-center justify-end mb-4">
         <span className={`inline-flex items-center px-2 py-1 text-sm font-medium rounded-lg ${
-          status === 'Live' 
+          daysLeft > 0 
             ? 'text-green-600 bg-green-50' 
-            : 'text-gray-600 bg-gray-50'
+            : 'text-red-600 bg-red-50'
         }`}>
-          {status === 'Live' ? (
+          {daysLeft > 0 ? (
             <svg className="w-3 h-3 mr-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 12h14"></path>
             </svg>
           ) : (
-            <svg className="w-3 h-3 mr-1.5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path>
+            <svg className="w-3 h-3 mr-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 6l12 12M6 18L18 6"></path>
             </svg>
           )}
-          {status}
+          {daysLeft > 0 ? 'Live' : 'Ended'}
         </span>
       </div>
 
@@ -175,14 +175,14 @@ const FundingStats: React.FC<FundingStatsProps> = ({
         </div>
 
         <div>
-          {status === 'Live' && daysLeft > 0 ? (
+          {daysLeft > 0 ? (
             <DonateButton poolId={poolId} onSuccess={handleDonationSuccess} />
           ) : (
             <button 
               disabled
               className="w-full py-3 px-4 bg-gray-400 text-white font-medium rounded-md cursor-not-allowed opacity-70"
             >
-              {status !== 'Live' ? 'Donation Closed' : 'Campaign Ended'}
+              Campaign Ended
             </button>
           )}
         </div>
