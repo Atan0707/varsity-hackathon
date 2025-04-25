@@ -363,6 +363,27 @@ export default function CreatePoolPage() {
                 </button>
               </div>
               
+              <div className="mt-2">
+                <p className="text-sm font-medium text-gray-700 mb-2">Quick add countries:</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Singapore', 'Japan', 'Palestine', 'USA', 'Malaysia', 'Indonesia', 'Australia'].map((country) => (
+                    <button
+                      key={country}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          checkpoints: [...prev.checkpoints, country]
+                        }));
+                      }}
+                      className="px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition text-sm"
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
               <div className="mt-3">
                 <p className="text-sm font-medium text-gray-700 mb-2">Current checkpoints:</p>
                 <ul className="space-y-2">
