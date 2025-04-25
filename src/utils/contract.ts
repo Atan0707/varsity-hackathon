@@ -318,4 +318,24 @@ export const getItemDetails = async (tokenId: string): Promise<ItemDetails | nul
     console.error('Error getting item details:', error);
     return null;
   }
+};
+
+export const isContractOwner = async (walletProvider: unknown): Promise<boolean> => {
+  try {
+    if (!walletProvider) return false;
+    
+    const contract = await getContract(walletProvider);
+    const owner = await contract.owner();
+    
+    // Get the current signer's address
+    const provider = new ethers.BrowserProvider(walletProvider as Eip1193Provider);
+    const signer = await provider.getSigner();
+    const currentAddress = await signer.getAddress();
+    
+    // Compare addresses (case-insensitive)
+    return owner.toLowerCase() === currentAddress.toLowerCase();
+  } catch (error) {
+    console.error('Error checking if wallet is contract owner:', error);
+    return false;
+  }
 }; 

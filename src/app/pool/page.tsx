@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getAllPoolsFromChain } from '@/utils/contract';
+import { getAllPoolsFromChain, isContractOwner } from '@/utils/contract';
 import { formatCurrency, Pool } from '@/utils/poolData';
 import { PoolLogo } from '@/components/ui/pool-logo';
 import { gql, request } from 'graphql-request';
 import { SUBGRAPH_URL } from '@/utils/config';
+import { useAppKitProvider } from '@reown/appkit/react';
 
 // GraphQL response type
 interface DonationReceivedResponse {
@@ -23,6 +24,9 @@ interface PoolWithDonors extends Pool {
 export default function PoolsListPage() {
   const [pools, setPools] = useState<PoolWithDonors[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const [ownerLoading, setOwnerLoading] = useState(true);
+  const { walletProvider } = useAppKitProvider("eip155");
 
   const getDonorsQuery = gql`
     query GetPoolDonors($poolId: BigInt!) {
@@ -93,18 +97,36 @@ export default function PoolsListPage() {
     fetchPools();
   }, [getDonorsQuery]);
 
+  // Check if current user is the contract owner
+  useEffect(() => {
+    const checkIsOwner = async () => {
+      setOwnerLoading(true);
+      if (walletProvider) {
+        const ownerStatus = await isContractOwner(walletProvider);
+        setIsOwner(ownerStatus);
+      } else {
+        setIsOwner(false);
+      }
+      setOwnerLoading(false);
+    };
+    
+    checkIsOwner();
+  }, [walletProvider]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 bg-[rgb(256,252,228)]">
 
       {/* Header with Create button */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-[#ed6400]">Donation Pools</h1>
-        <Link href="/pool/create" className="bg-[#ed6400] text-white py-3 px-6 rounded-md hover:bg-[#0c252a]/90 transition flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Create New Pool
-        </Link>
+        {!ownerLoading && isOwner && (
+          <Link href="/pool/create" className="bg-[#ed6400] text-white py-3 px-6 rounded-md hover:bg-[#0c252a]/90 transition flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create New Pool
+          </Link>
+        )}
       </div>
 
       {/* Search section  */}

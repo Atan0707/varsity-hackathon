@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
-import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 
@@ -46,24 +45,18 @@ export default function Navbar() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleConnected = () => {
-        toast.success("Wallet Connected", {
-          description: "Your wallet has been connected successfully.",
-          icon: "🦊",
-        });
+        // Removed toast notification for wallet connection
+        console.log("Wallet connected");
       };
 
       const handleDisconnected = () => {
-        toast.error("Wallet Disconnected", {
-          description: "Your wallet has been disconnected.",
-          icon: "🔌",
-        });
+        // Removed toast notification for wallet disconnection
+        console.log("Wallet disconnected");
       };
 
       const handleChainChanged = () => {
-        toast.info("Network Changed", {
-          description: "You have switched to a different blockchain network.",
-          icon: "🔄",
-        });
+        // Removed toast notification for chain change
+        console.log("Network changed");
       };
 
       document.addEventListener("appkit:connected", handleConnected);
@@ -169,10 +162,7 @@ export default function Navbar() {
                   <button
                     onClick={() => {
                       open({ view: "Account" });
-                      toast("Account Details", {
-                        description: "Viewing your wallet account details.",
-                        icon: "👤",
-                      });
+                      // Removed toast notification for account details
                     }}
                     className="px-4 py-1.5 text-[#ed6400] border border-[#ed6400] rounded-lg 
                       hover:bg-[rgba(15,45,50,0.1)] font-medium transition-colors"
