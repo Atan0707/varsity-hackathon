@@ -3,6 +3,8 @@ import ProgressBar from '../ProgressBar';
 import DonateButton from '@/components/pool/DonateButton';
 import { getPoolByIdFromChain } from '@/utils/contract';
 import { Pool } from '@/utils/poolData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDonations, DonatorData } from '@/utils/graphql';
 
 interface FundingStatsProps {
   poolId: string;
@@ -22,6 +24,16 @@ const FundingStats: React.FC<FundingStatsProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
+  // Use react-query to fetch donations data
+  const { data: donationsData } = useQuery<DonatorData[]>({
+    queryKey: ['poolDonations', poolId],
+    queryFn: () => fetchDonations(poolId),
+    refetchOnWindowFocus: false,
+  });
+
+  // Get total donations count
+  const donationsCount = donationsData?.length || 0;
+
   // Function to fetch data from blockchain
   const fetchPoolData = useCallback(async () => {
     try {
@@ -33,7 +45,10 @@ const FundingStats: React.FC<FundingStatsProps> = ({
       
       if (data) {
         console.log('Fetched pool data from blockchain:', data);
-        setPoolData(data);
+        setPoolData({
+          ...data,
+          donors: donationsCount // Override donors count with total donations count
+        });
       } else {
         console.error('No pool data found for poolId:', poolId);
         setIsError(true);
@@ -44,9 +59,9 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [poolId]);
+  }, [poolId, donationsCount]);
 
-  // Fetch pool data on component mount and when poolId changes
+  // Fetch pool data on component mount and when poolId or donationsCount changes
   useEffect(() => {
     fetchPoolData();
   }, [poolId, fetchPoolData]);
@@ -112,7 +127,6 @@ const FundingStats: React.FC<FundingStatsProps> = ({
     currentAmount,
     targetAmount,
     percentageRaised,
-    donors,
     daysLeft
   } = poolData;
 
@@ -151,8 +165,8 @@ const FundingStats: React.FC<FundingStatsProps> = ({
 
       <div className="space-y-6">
         <div>
-          <div className="text-2xl font-bold mb-1">{donors}</div>
-          <div className="text-sm text-gray-600 uppercase">Donators</div>
+          <div className="text-2xl font-bold mb-1">{donationsCount}</div>
+          <div className="text-sm text-gray-600 uppercase">Donations</div>
         </div>
 
         <div>
