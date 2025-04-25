@@ -27,9 +27,12 @@ export default function PoolItems({ poolId }: PoolItemsProps) {
   const [itemDetails, setItemDetails] = useState<Record<string, ItemDetails>>({});
   const { walletProvider } = useAppKitProvider("eip155");
   
-  const { data: items, isLoading: loading, error } = useQuery<PoolItemData[]>({
+  const { data: items, isLoading: loading, error, refetch } = useQuery<PoolItemData[]>({
     queryKey: ['poolItems', poolId],
     queryFn: () => fetchPoolItems(poolId),
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 60000,
   });
 
   useEffect(() => {
@@ -97,6 +100,12 @@ export default function PoolItems({ poolId }: PoolItemsProps) {
         <p className="mt-1 text-sm text-red-500">
           {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </p>
+        <button 
+          onClick={() => refetch()} 
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

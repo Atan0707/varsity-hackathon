@@ -9,6 +9,9 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+  },
+  env: {
+    NEXT_PUBLIC_SUBGRAPH_URL: process.env.NEXT_PUBLIC_SUBGRAPH_URL || "https://api.studio.thegraph.com/query/105196/vhackv2/version/latest"
   }
 };
 

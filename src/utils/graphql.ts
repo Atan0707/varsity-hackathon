@@ -1,6 +1,9 @@
 import { createClient, fetchExchange } from '@urql/core';
 import { SUBGRAPH_URL } from './config';
 
+// Add logging to help debug issues
+console.log('Using Subgraph URL:', SUBGRAPH_URL);
+
 // Initialize the URQL client
 const client = createClient({
   url: SUBGRAPH_URL,
@@ -79,6 +82,7 @@ export const getPoolItemsQuery = `
 
 export const fetchPoolItems = async (poolId: string): Promise<PoolItemData[]> => {
   try {
+    console.log('Fetching pool items for poolId:', poolId, 'from URL:', SUBGRAPH_URL);
     const response = await client.query(getPoolItemsQuery, { poolId }).toPromise();
     
     if (response.error) {
@@ -86,9 +90,11 @@ export const fetchPoolItems = async (poolId: string): Promise<PoolItemData[]> =>
       throw new Error('Failed to fetch pool items');
     }
 
+    console.log('Successfully fetched pool items:', response.data?.itemCreateds?.length || 0);
     return response.data.itemCreateds;
   } catch (error) {
     console.error('Error in fetchPoolItems:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent UI breakage
+    return [];
   }
 }; 
