@@ -161,6 +161,12 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [ethAmount, setEthAmount] = useState<string>('0');
   const [isLoadingPrice, setIsLoadingPrice] = useState(false);
+  const [poolDetails, setPoolDetails] = useState<{
+    targetAmount: string;
+    totalDonated: string;
+    remainingAmount: string;
+  } | null>(null);
+  const [isPoolDetailsLoading, setIsPoolDetailsLoading] = useState(false);
 
   // Bank payment form state
   const [bankDetails, setBankDetails] = useState({
@@ -180,9 +186,18 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
     { id: 'rhb', name: 'RHB', logo: '/banks/rhb-logo.png' },
   ];
 
-  // Fetch ETH price when modal is opened
+  // Preset donation amounts
+  const presetAmounts = [
+    { value: '10', label: 'RM10' },
+    { value: '20', label: 'RM20' },
+    { value: '50', label: 'RM50' },
+    { value: 'max', label: 'Max' },
+  ];
+
+  // Fetch pool details and ETH price when modal is opened
   useEffect(() => {
     if (showModal) {
+      fetchPoolDetails();
       fetchEthPrice();
     }
   }, [showModal]);
@@ -191,6 +206,38 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
   useEffect(() => {
     calculateEthAmount();
   }, [amount, ethPrice]);
+
+  // Fetch pool details from the contract
+  const fetchPoolDetails = async () => {
+    setIsPoolDetailsLoading(true);
+    try {
+      // Create provider and connect to the network
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
+      
+      // Create contract instance
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, contractAbi, provider);
+      
+      // Call getPoolDetails function
+      const details = await contract.getPoolDetails(parseInt(poolId));
+      
+      // Format values from wei to ETH (or appropriate unit)
+      const targetAmount = ethers.formatEther(details[4]);
+      const totalDonated = ethers.formatEther(details[6]);
+      const remainingAmount = (parseFloat(targetAmount) - parseFloat(totalDonated)).toString();
+      
+      setPoolDetails({
+        targetAmount,
+        totalDonated,
+        remainingAmount,
+      });
+      
+    } catch (error) {
+      console.error('Failed to fetch pool details:', error);
+      setError('Failed to fetch pool details. Please try again later.');
+    } finally {
+      setIsPoolDetailsLoading(false);
+    }
+  };
 
   // Fetch ETH price from CoinGecko
   const fetchEthPrice = async () => {
@@ -203,6 +250,27 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       setError('Failed to fetch current ETH price. Please try again later.');
     } finally {
       setIsLoadingPrice(false);
+    }
+  };
+
+  // Handle preset amount selection
+  const handlePresetAmount = (presetAmount: string) => {
+    if (!poolDetails) return;
+    
+    if (presetAmount === 'max') {
+      // Set to remaining amount (target - collected)
+      setAmount(poolDetails.remainingAmount);
+    } else {
+      // Check if preset amount exceeds remaining amount
+      const amountValue = parseFloat(presetAmount);
+      const remainingValue = parseFloat(poolDetails.remainingAmount);
+      
+      if (amountValue > remainingValue) {
+        // If preset exceeds remaining, set to remaining amount
+        setAmount(remainingValue.toString());
+      } else {
+        setAmount(presetAmount);
+      }
     }
   };
 
@@ -620,15 +688,71 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
                     <p className="text-sm text-gray-500 mb-3 text-center">
                       Enter the amount you want to donate (in MYR)
                     </p>
+                    
+                    {/* Preset Amount Buttons */}
+                    <div className="grid grid-cols-4 gap-2 mb-3">
+                      {presetAmounts.map((preset) => {
+                        // Determine if button should be disabled
+                        const isDisabled = isPoolDetailsLoading || 
+                          !poolDetails || 
+                          (preset.value !== 'max' && 
+                            parseFloat(preset.value) > parseFloat(poolDetails?.remainingAmount || '0'));
+                        
+                        return (
+                          <button
+                            key={preset.value}
+                            onClick={() => handlePresetAmount(preset.value)}
+                            disabled={isDisabled}
+                            className={`py-2 px-2 rounded-md text-sm font-medium transition
+                              ${isDisabled 
+                                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                : 'bg-[#ed6400] text-white hover:bg-[#d15800]'}`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
                     <input
                       type="number"
                       value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="10.00"
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        
+                        // Ensure amount doesn't exceed remaining amount
+                        if (poolDetails && parseFloat(inputValue) > parseFloat(poolDetails.remainingAmount)) {
+                          setAmount(poolDetails.remainingAmount);
+                        } else {
+                          setAmount(inputValue);
+                        }
+                      }}
+                      placeholder="Amount in MYR"
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
                       step="1"
                       min="1"
+                      max={poolDetails?.remainingAmount}
                     />
+                    
+                    {/* Pool details information */}
+                    {isPoolDetailsLoading ? (
+                      <p className="mt-2 text-xs text-gray-500 text-center">Loading pool details...</p>
+                    ) : poolDetails && (
+                      <div className="mt-2 text-xs text-gray-500">
+                        <div className="flex justify-between items-center">
+                          <span>Target amount:</span>
+                          <span>{parseFloat(poolDetails.targetAmount).toFixed(2)} ETH</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Total collected:</span>
+                          <span>{parseFloat(poolDetails.totalDonated).toFixed(2)} ETH</span>
+                        </div>
+                        <div className="flex justify-between items-center font-medium">
+                          <span>Remaining:</span>
+                          <span>{parseFloat(poolDetails.remainingAmount).toFixed(2)} ETH</span>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Show ETH equivalent */}
                     {ethPrice && amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
