@@ -123,14 +123,14 @@ export default function PoolPage({ params }: {params: Promise<{id: string}>}) {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          {/* <div className="flex flex-wrap gap-2 mb-6">
             {pool.categories.map((category, index) => (
               <CategoryTag key={index} text={category} />
             ))}
             {pool.badges.map((badge, index) => (
               <Badge key={index} text={badge} />
             ))}
-          </div>
+          </div> */}
 
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:flex-1">
