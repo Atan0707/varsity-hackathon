@@ -24,7 +24,7 @@ export const getContract = async (walletProvider: unknown): Promise<Contract> =>
 export const getReadOnlyContract = (): Contract => {
   try {
     // For read-only operations, use a provider instead of a signer
-    const provider = new ethers.JsonRpcProvider('https://sepolia-rpc.scroll.io/'); // Example RPC URL (Sepolia testnet)
+    const provider = new ethers.JsonRpcProvider('https://scroll-sepolia.g.alchemy.com/v2/7z_rnkKFONf8r6Adr1poXg1qugZlhclq'); // Example RPC URL (Sepolia testnet)
     return new ethers.Contract(CONTRACT_ADDRESS, contractABI, provider);
   } catch (error) {
     console.error('Error getting read-only contract:', error);
