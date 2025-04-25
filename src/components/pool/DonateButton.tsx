@@ -446,347 +446,348 @@ export default function DonateButton({ poolId, onSuccess }: DonateButtonProps) {
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-          <div className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            
-            {/* Payment Confirmation Screen - shows after clicking Confirm */}
-            {showConfirmation ? (
-              <div className="w-full">
-                {/* Header */}
-                <div className="bg-[#2b5329] text-[#ffcc00] p-4 -m-5 mb-4 rounded-t-md">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold">Bank Online Payment</h2>
-                    {paymentStatus === 'success' && (
-                      <span className="text-sm px-2 py-1 bg-green-700 text-white rounded">
-                        Logout
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-center mb-6">Online Payment</h3>
-                
-                {/* Payment Details */}
-                <div className="border rounded-md p-4 mb-6">
-                  <div className="grid grid-cols-2 gap-y-3">
-                    <div className="text-gray-700">Organization:</div>
-                    <div className="text-right font-medium">Fund</div>
-                    
-                    <div className="text-gray-700">Bill account no.:</div>
-                    <div className="text-right font-medium">{poolId.padStart(4, '0')}</div>
-                    
-                    <div className="text-gray-700">Amount (MYR):</div>
-                    <div className="text-right font-medium">RM{amount}</div>
-                    
-                    <div className="text-gray-700">Amount (ETH):</div>
-                    <div className="text-right font-medium">{ethAmount} ETH</div>
-                    
-                    <div className="text-gray-700">ETH Rate:</div>
-                    <div className="text-right font-medium">RM{ethPrice?.toFixed(2)}/ETH</div>
-                    
-                    <div className="text-gray-700">Effective date:</div>
-                    <div className="text-right font-medium">Today</div>
-                    
-                    <div className="text-gray-700">TAC</div>
-                    <div className="text-right">
-                      <div className="w-5 h-5 bg-blue-500 text-white rounded inline-flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Secure Verification */}
-                <div 
-                  className={`bg-[#fffce3] p-4 rounded-md mb-6 cursor-pointer transition ${!verificationClicked ? 'hover:bg-[#fff9d1]' : ''}`} 
-                  onClick={!verificationClicked && paymentStatus === 'processing' ? handleSecureVerificationClick : undefined}
-                >
-                  <div className="flex items-start">
-                    <div className="mr-2">
-                      <div className={`w-5 h-5 rounded-full border-2 ${verificationClicked ? 'border-green-500' : 'border-gray-400'} flex items-center justify-center`}>
-                        <div className={`w-2 h-2 ${verificationClicked ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex items-center">
-                        <span className="font-semibold">Secure Verification</span>
-                        <span className="ml-1 text-white bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">i</span>
-                      </div>
-                      <p className="text-sm mt-1">
-                        {!verificationClicked && paymentStatus === 'processing' ? (
-                          "Click here to authorize this transaction"
-                        ) : paymentStatus === 'processing' ? (
-                          "You will receive a notification on your phone to authorise this transaction on the new Maybank app."
-                        ) : paymentStatus === 'success' ? (
-                          "Your transaction has been authorized and completed successfully."
-                        ) : (
-                          "Transaction authorization failed. Please try again."
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Status Message */}
-                {paymentStatus !== 'processing' && (
-                  <div className={`p-3 rounded-md mb-6 text-center ${paymentStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {paymentStatus === 'success' 
-                      ? `Donation of RM${amount} (${ethAmount} ETH) recorded successfully!` 
-                      : 'Payment failed. Please try again.'}
-                    
-                    {/* Show transaction hash if available */}
-                    {paymentStatus === 'success' && txHash && (
-                      <div className="mt-2 text-xs break-all">
-                        <p>Transaction Hash:</p>
-                        <p className="font-mono">{txHash}</p>
-                        <p className="mt-2 text-gray-600">Your donation was processed at rate of RM{ethPrice?.toFixed(2)}/ETH</p>
-                      </div>
-                    )}
-                    
-                    {/* Show detailed error if available */}
-                    {paymentStatus === 'failed' && error && error.length > 0 && (
-                      <div className="mt-2 text-xs break-all">
-                        <p>Error details:</p>
-                        <p className="font-mono">{error}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* Download Receipt Button - Only show after successful payment */}
-                {paymentStatus === 'success' && (
-                  <div className="mb-6">
-                    <button
-                      onClick={() => downloadReceipt(
-                        poolId, 
-                        amount, 
-                        selectedBank ? banks.find(b => b.id === selectedBank)?.name || 'Bank' : 'Bank',
-                        ethAmount,
-                        ethPrice?.toFixed(2) || '0'
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="min-h-screen px-4 text-center flex items-center justify-center">
+            <div className="relative bg-white w-full max-w-md mx-auto rounded-lg shadow-lg p-6 my-8">
+              {/* Payment Confirmation Screen - shows after clicking Confirm */}
+              {showConfirmation ? (
+                <div className="w-full">
+                  {/* Header */}
+                  <div className="bg-[#2b5329] text-[#ffcc00] p-4 -m-5 mb-4 rounded-t-md">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-xl font-bold">Bank Online Payment</h2>
+                      {paymentStatus === 'success' && (
+                        <span className="text-sm px-2 py-1 bg-green-700 text-white rounded">
+                          Logout
+                        </span>
                       )}
-                      className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                      Download Receipt
-                    </button>
+                    </div>
                   </div>
-                )}
-                
-                {/* Action Buttons */}
-                <div className="flex justify-center items-center space-x-4">
-                  {paymentStatus === 'processing' ? (
-                    <>
+                  
+                  <h3 className="text-xl font-semibold text-center mb-6">Online Payment</h3>
+                  
+                  {/* Payment Details */}
+                  <div className="border rounded-md p-4 mb-6">
+                    <div className="grid grid-cols-2 gap-y-3">
+                      <div className="text-gray-700">Organization:</div>
+                      <div className="text-right font-medium">Fund</div>
+                      
+                      <div className="text-gray-700">Bill account no.:</div>
+                      <div className="text-right font-medium">{poolId.padStart(4, '0')}</div>
+                      
+                      <div className="text-gray-700">Amount (MYR):</div>
+                      <div className="text-right font-medium">RM{amount}</div>
+                      
+                      <div className="text-gray-700">Amount (ETH):</div>
+                      <div className="text-right font-medium">{ethAmount} ETH</div>
+                      
+                      <div className="text-gray-700">ETH Rate:</div>
+                      <div className="text-right font-medium">RM{ethPrice?.toFixed(2)}/ETH</div>
+                      
+                      <div className="text-gray-700">Effective date:</div>
+                      <div className="text-right font-medium">Today</div>
+                      
+                      <div className="text-gray-700">TAC</div>
+                      <div className="text-right">
+                        <div className="w-5 h-5 bg-blue-500 text-white rounded inline-flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Secure Verification */}
+                  <div 
+                    className={`bg-[#fffce3] p-4 rounded-md mb-6 cursor-pointer transition ${!verificationClicked ? 'hover:bg-[#fff9d1]' : ''}`} 
+                    onClick={!verificationClicked && paymentStatus === 'processing' ? handleSecureVerificationClick : undefined}
+                  >
+                    <div className="flex items-start">
+                      <div className="mr-2">
+                        <div className={`w-5 h-5 rounded-full border-2 ${verificationClicked ? 'border-green-500' : 'border-gray-400'} flex items-center justify-center`}>
+                          <div className={`w-2 h-2 ${verificationClicked ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center">
+                          <span className="font-semibold">Secure Verification</span>
+                          <span className="ml-1 text-white bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">i</span>
+                        </div>
+                        <p className="text-sm mt-1">
+                          {!verificationClicked && paymentStatus === 'processing' ? (
+                            "Click here to authorize this transaction"
+                          ) : paymentStatus === 'processing' ? (
+                            "You will receive a notification on your phone to authorise this transaction on the new Maybank app."
+                          ) : paymentStatus === 'success' ? (
+                            "Your transaction has been authorized and completed successfully."
+                          ) : (
+                            "Transaction authorization failed. Please try again."
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Status Message */}
+                  {paymentStatus !== 'processing' && (
+                    <div className={`p-3 rounded-md mb-6 text-center ${paymentStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {paymentStatus === 'success' 
+                        ? `Donation of RM${amount} (${ethAmount} ETH) recorded successfully!` 
+                        : 'Payment failed. Please try again.'}
+                      
+                      {/* Show transaction hash if available */}
+                      {paymentStatus === 'success' && txHash && (
+                        <div className="mt-2 text-xs break-all">
+                          <p>Transaction Hash:</p>
+                          <p className="font-mono">{txHash}</p>
+                          <p className="mt-2 text-gray-600">Your donation was processed at rate of RM{ethPrice?.toFixed(2)}/ETH</p>
+                        </div>
+                      )}
+                      
+                      {/* Show detailed error if available */}
+                      {paymentStatus === 'failed' && error && error.length > 0 && (
+                        <div className="mt-2 text-xs break-all">
+                          <p>Error details:</p>
+                          <p className="font-mono">{error}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Download Receipt Button - Only show after successful payment */}
+                  {paymentStatus === 'success' && (
+                    <div className="mb-6">
                       <button
-                        onClick={handleConfirmPayment}
-                        className={`px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md ${!verificationClicked || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e6b800]'}`}
-                        disabled={!verificationClicked || isLoading}
+                        onClick={() => downloadReceipt(
+                          poolId, 
+                          amount, 
+                          selectedBank ? banks.find(b => b.id === selectedBank)?.name || 'Bank' : 'Bank',
+                          ethAmount,
+                          ethPrice?.toFixed(2) || '0'
+                        )}
+                        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md flex justify-center items-center"
                       >
-                        {isLoading ? 'Processing...' : 'Confirm'}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        Download Receipt
                       </button>
-                      <span className="text-gray-700">or</span>
+                    </div>
+                  )}
+                  
+                  {/* Action Buttons */}
+                  <div className="flex justify-center items-center space-x-4">
+                    {paymentStatus === 'processing' ? (
+                      <>
+                        <button
+                          onClick={handleConfirmPayment}
+                          className={`px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md ${!verificationClicked || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#e6b800]'}`}
+                          disabled={!verificationClicked || isLoading}
+                        >
+                          {isLoading ? 'Processing...' : 'Confirm'}
+                        </button>
+                        <span className="text-gray-700">or</span>
+                        <button
+                          onClick={handleGoBack}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Go back
+                        </button>
+                      </>
+                    ) : (
                       <button
                         onClick={handleGoBack}
-                        className="text-blue-600 hover:underline"
+                        className="px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md hover:bg-[#e6b800]"
                       >
-                        Go back
+                        {paymentStatus === 'success' ? 'Close' : 'Try Again'}
                       </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={handleGoBack}
-                      className="px-6 py-2 bg-[#ffcc00] text-gray-900 font-medium rounded-md hover:bg-[#e6b800]"
-                    >
-                      {paymentStatus === 'success' ? 'Close' : 'Try Again'}
-                    </button>
-                  )}
-                </div>
-
-                {!verificationClicked && paymentStatus === 'processing' && (
-                  <div className="text-center mt-3 text-sm text-amber-700">
-                    Please click on Secure Verification above to continue
+                    )}
                   </div>
-                )}
-              </div>
-            ) : (
-              // Original Payment Options Screen
-              <div className="mt-3">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 text-center">Donate to Pool #{poolId}</h3>
-                
-                <div className="mt-4 px-4">
-                  <p className="text-sm text-gray-500 mb-3 text-center">
-                    Enter the amount you want to donate (in MYR)
-                  </p>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="10.00"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
-                    step="1"
-                    min="1"
-                  />
-                  
-                  {/* Show ETH equivalent */}
-                  {ethPrice && amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
-                    <div className="mt-2 text-sm text-gray-600 flex justify-between items-center px-1">
-                      <span>Equivalent in ETH:</span>
-                      <span className="font-medium">≈ {ethAmount} ETH</span>
+
+                  {!verificationClicked && paymentStatus === 'processing' && (
+                    <div className="text-center mt-3 text-sm text-amber-700">
+                      Please click on Secure Verification above to continue
                     </div>
-                  )}
-                  
-                  {isLoadingPrice && (
-                    <p className="mt-2 text-xs text-gray-500 text-center">Loading current ETH price...</p>
-                  )}
-                  
-                  {ethPrice && (
-                    <p className="mt-1 text-xs text-gray-500 text-center">
-                      Current ETH price: RM{ethPrice.toFixed(2)}/ETH
-                      <button 
-                        onClick={fetchEthPrice} 
-                        className="ml-2 text-blue-500 hover:text-blue-700"
-                        disabled={isLoadingPrice}
-                      >
-                        {isLoadingPrice ? 'Updating...' : '↻'}
-                      </button>
-                    </p>
                   )}
                 </div>
-
-                <div className="mt-4 px-4">
-                  <p className="text-sm text-gray-500 mb-2">Select payment method:</p>
-                  <div className="flex space-x-4">
-                    <div 
-                      className={`flex-1 p-3 border rounded-md cursor-pointer transition ${paymentMethod === 'fpx' ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
-                      onClick={() => setPaymentMethod('fpx')}
-                    >
-                      <div className="text-center">
-                        <p className="font-medium">FPX</p>
-                        <p className="text-xs text-gray-500 mt-1">Online Banking</p>
-                      </div>
-                    </div>
-                    <div 
-                      className={`flex-1 p-3 border rounded-md cursor-pointer transition ${paymentMethod === 'bank' ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
-                      onClick={() => setPaymentMethod('bank')}
-                    >
-                      <div className="text-center">
-                        <p className="font-medium">Bank Card</p>
-                        <p className="text-xs text-gray-500 mt-1">Credit/Debit</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {paymentMethod === 'fpx' && (
+              ) : (
+                // Original Payment Options Screen
+                <div className="mt-3 max-h-[80vh] overflow-y-auto">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 text-center">Donate to Pool #{poolId}</h3>
+                  
                   <div className="mt-4 px-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Select your bank:</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {banks.map((bank) => (
-                        <div 
-                          key={bank.id}
-                          className={`p-3 border rounded-md cursor-pointer transition flex flex-col items-center justify-center ${selectedBank === bank.id ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
-                          onClick={() => setSelectedBank(bank.id)}
+                    <p className="text-sm text-gray-500 mb-3 text-center">
+                      Enter the amount you want to donate (in MYR)
+                    </p>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="10.00"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
+                      step="1"
+                      min="1"
+                    />
+                    
+                    {/* Show ETH equivalent */}
+                    {ethPrice && amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
+                      <div className="mt-2 text-sm text-gray-600 flex justify-between items-center px-1">
+                        <span>Equivalent in ETH:</span>
+                        <span className="font-medium">≈ {ethAmount} ETH</span>
+                      </div>
+                    )}
+                    
+                    {isLoadingPrice && (
+                      <p className="mt-2 text-xs text-gray-500 text-center">Loading current ETH price...</p>
+                    )}
+                    
+                    {ethPrice && (
+                      <p className="mt-1 text-xs text-gray-500 text-center">
+                        Current ETH price: RM{ethPrice.toFixed(2)}/ETH
+                        <button 
+                          onClick={fetchEthPrice} 
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                          disabled={isLoadingPrice}
                         >
-                          <div className="relative h-10 w-full mb-2">
-                            <Image
-                              src={bank.logo}
-                              alt={bank.name}
-                              fill
-                              style={{ objectFit: 'contain' }}
+                          {isLoadingPrice ? 'Updating...' : '↻'}
+                        </button>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-4 px-4">
+                    <p className="text-sm text-gray-500 mb-2">Select payment method:</p>
+                    <div className="flex space-x-4">
+                      <div 
+                        className={`flex-1 p-3 border rounded-md cursor-pointer transition ${paymentMethod === 'fpx' ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
+                        onClick={() => setPaymentMethod('fpx')}
+                      >
+                        <div className="text-center">
+                          <p className="font-medium">FPX</p>
+                          <p className="text-xs text-gray-500 mt-1">Online Banking</p>
+                        </div>
+                      </div>
+                      <div 
+                        className={`flex-1 p-3 border rounded-md cursor-pointer transition ${paymentMethod === 'bank' ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
+                        onClick={() => setPaymentMethod('bank')}
+                      >
+                        <div className="text-center">
+                          <p className="font-medium">Bank Card</p>
+                          <p className="text-xs text-gray-500 mt-1">Credit/Debit</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {paymentMethod === 'fpx' && (
+                    <div className="mt-4 px-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Select your bank:</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {banks.map((bank) => (
+                          <div 
+                            key={bank.id}
+                            className={`p-3 border rounded-md cursor-pointer transition flex flex-col items-center justify-center ${selectedBank === bank.id ? 'border-[#ed6400] bg-orange-50' : 'border-gray-300'}`}
+                            onClick={() => setSelectedBank(bank.id)}
+                          >
+                            <div className="relative h-10 w-full mb-2">
+                              <Image
+                                src={bank.logo}
+                                alt={bank.name}
+                                fill
+                                style={{ objectFit: 'contain' }}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-700">{bank.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'bank' && (
+                    <div className="mt-4 px-4">
+                      <div className="space-y-3">
+                        <div>
+                          <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700">Card Number</label>
+                          <input
+                            type="text"
+                            id="cardNumber"
+                            name="cardNumber"
+                            value={bankDetails.cardNumber}
+                            onChange={handleInputChange}
+                            placeholder="1234 5678 9012 3456"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700">Expiry Date</label>
+                            <input
+                              type="text"
+                              id="expiryDate"
+                              name="expiryDate"
+                              value={bankDetails.expiryDate}
+                              onChange={handleInputChange}
+                              placeholder="MM/YY"
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
                             />
                           </div>
-                          <p className="text-xs text-gray-700">{bank.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'bank' && (
-                  <div className="mt-4 px-4">
-                    <div className="space-y-3">
-                      <div>
-                        <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700">Card Number</label>
-                        <input
-                          type="text"
-                          id="cardNumber"
-                          name="cardNumber"
-                          value={bankDetails.cardNumber}
-                          onChange={handleInputChange}
-                          placeholder="1234 5678 9012 3456"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700">Expiry Date</label>
-                          <input
-                            type="text"
-                            id="expiryDate"
-                            name="expiryDate"
-                            value={bankDetails.expiryDate}
-                            onChange={handleInputChange}
-                            placeholder="MM/YY"
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
-                          />
+                          <div>
+                            <label htmlFor="cvv" className="block text-sm font-medium text-gray-700">CVV</label>
+                            <input
+                              type="text"
+                              id="cvv"
+                              name="cvv"
+                              value={bankDetails.cvv}
+                              onChange={handleInputChange}
+                              placeholder="123"
+                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label htmlFor="cvv" className="block text-sm font-medium text-gray-700">CVV</label>
+                          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Cardholder Name</label>
                           <input
                             type="text"
-                            id="cvv"
-                            name="cvv"
-                            value={bankDetails.cvv}
+                            id="name"
+                            name="name"
+                            value={bankDetails.name}
                             onChange={handleInputChange}
-                            placeholder="123"
+                            placeholder="John Doe"
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
                           />
                         </div>
                       </div>
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Cardholder Name</label>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          value={bankDetails.name}
-                          onChange={handleInputChange}
-                          placeholder="John Doe"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#ed6400] focus:border-[#ed6400] sm:text-sm"
-                        />
-                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {error && <p className="text-red-500 text-sm mt-3 px-4 text-center">{error}</p>}
-                
-                <div className="items-center px-4 py-3 mt-4">
-                  <button
-                    onClick={handleDonate}
-                    disabled={isLoading || (paymentMethod === 'fpx' && !selectedBank)}
-                    className={`px-4 py-2 bg-[#ed6400] text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-[#d15800] focus:outline-none focus:ring-2 focus:ring-[#ed6400] ${
-                      isLoading || (paymentMethod === 'fpx' && !selectedBank) ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {isLoading 
-                      ? 'Processing...' 
-                      : paymentMethod === 'fpx' && !selectedBank
-                        ? 'Select a Bank First' 
-                        : `Confirm ${paymentMethod === 'fpx' ? 'FPX' : 'Card'} Payment`}
-                  </button>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="mt-3 px-4 py-2 bg-gray-100 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                  >
-                    Cancel
-                  </button>
+                  {error && <p className="text-red-500 text-sm mt-3 px-4 text-center">{error}</p>}
+                  
+                  <div className="sticky bottom-0 bg-white pt-4 border-t">
+                    <button
+                      onClick={handleDonate}
+                      disabled={isLoading || (paymentMethod === 'fpx' && !selectedBank)}
+                      className={`px-4 py-2 bg-[#ed6400] text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-[#d15800] focus:outline-none focus:ring-2 focus:ring-[#ed6400] ${
+                        isLoading || (paymentMethod === 'fpx' && !selectedBank) ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isLoading 
+                        ? 'Processing...' 
+                        : paymentMethod === 'fpx' && !selectedBank
+                          ? 'Select a Bank First' 
+                          : `Confirm ${paymentMethod === 'fpx' ? 'FPX' : 'Card'} Payment`}
+                    </button>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="mt-3 px-4 py-2 bg-gray-100 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
