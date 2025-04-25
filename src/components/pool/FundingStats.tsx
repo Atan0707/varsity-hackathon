@@ -123,7 +123,7 @@ const FundingStats: React.FC<FundingStatsProps> = ({
 
   // Extract values from the pool data
   const {
-    status,
+    // status,
     currentAmount,
     targetAmount,
     percentageRaised,
