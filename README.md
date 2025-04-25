@@ -1,6 +1,6 @@
 # GlassFund
 
-GlassFund is a transparent charity funding platform built on the Scroll network that allows donors to track their donations through NFTs with NFC tags.
+GlassFund is a transparent charity funding platform built on the Scroll network that allows donors to track their donations through NFTs with NFC tags and QR codes.
 
 ## Live Demo
 
@@ -23,34 +23,34 @@ GlassFund introduces a new model for charity donations where:
    - Embeds NFC stickers and QR codes on physical items
    - Ships items to locations in need (e.g., Palestine)
    - Updates location data across defined checkpoints
-   - Staff scan NFC stickers to update the location of items
+   - Staff scan QR codes using Raspberry Pi devices to update item locations
    - Donors can track their donations in real-time
 
 ## Front-End View
 
 ### GlassFund Landing Page
+
 ![image](https://github.com/user-attachments/assets/2088bee5-6dfa-4eb6-b085-cd831de4bb2b)
 
-
 ### GlassFund DAO
+
 ![image](https://github.com/user-attachments/assets/c2bb7975-d23b-432c-97aa-d125ec1bc1eb)
 
 ### Current crowdfund pool - Everything is on-chain
+
 ![image](https://github.com/user-attachments/assets/02793147-1995-4a64-bb18-f39e863f03e4)
 
-
 ### Crowdfund pool page - Users can donate their money here
+
 ![image](https://github.com/user-attachments/assets/ed3a9d80-275f-46b3-b11c-efdfb4b6b3ac)
 
-
 ### User can view the crowdfund progress
+
 ![image](https://github.com/user-attachments/assets/4a8477f4-2342-4c32-98cb-4adcf5d0db37)
 
-
 ### All donators will be listed here
+
 ![image](https://github.com/user-attachments/assets/961e4362-8f59-4622-8bee-5a36f38c0311)
-
-
 
 ## Technology Stack
 
@@ -60,7 +60,10 @@ GlassFund introduces a new model for charity donations where:
 - **Web3 Integration**: ethers.js and Reown AppKit
 - **UI**: TailwindCSS and Framer Motion
 - **Authentication**: Wallet-based authentication
-- **Physical Integration**: NFC tags + QR codes for item tracking
+- **Physical Integration**:
+  - NFC tags for item identification
+  - QR codes containing transaction hashes for tracking
+  - Raspberry Pi devices with cameras at checkpoints for scanning
 
 ## Project Architecture
 
@@ -130,14 +133,36 @@ yarn dev
 
 ## Checkpoints System
 
-Our unique 4-checkpoint system ensures complete transparency:
+Our unique checkpoint system ensures complete transparency:
 
-1. **First Stop (Singapore)**: Initial processing and preparation
-2. **Transit Point 1**: International shipping milestone
-3. **Transit Point 2**: Regional distribution center
-4. **Final Destination**: Delivery to those in need
+1. **Origin Point (e.g., Malaysia)**: Items are purchased and minted as NFTs
+2. **Checkpoint 1 (e.g., Singapore)**: Initial processing and preparation
+3. **Checkpoint 2 (e.g., Egypt)**: International shipping milestone
+4. **Final Destination (e.g., Palestine)**: Delivery to those in need
 
-At each checkpoint, our staff scan the NFC tags embedded in the donated goods, updating the blockchain record and allowing donors to track their contributions in real-time.
+At each checkpoint, our Raspberry Pi tracking system scans QR codes on the donated goods. Each QR code contains the transaction hash from when the item was minted as an NFT. The system then:
+
+1. Retrieves the NFT token ID from the transaction hash
+2. Determines which pool the item belongs to
+3. Updates the blockchain with the current location based on the device's location
+4. Notifies donors of item progress
+
+This allows donors to track their contributions in real-time with full transparency.
+
+## Raspberry Pi Tracking System
+
+We've implemented a Raspberry Pi-based tracking system at each checkpoint to scan and update item locations:
+
+- **Hardware**: Raspberry Pi with camera, button, LEDs, and buzzer
+- **Functionality**:
+  - Scans QR codes containing transaction hashes
+  - Automatically identifies all items in a pool
+  - Updates item locations on the blockchain
+  - Provides visual and audio feedback during scanning
+- **Deployment**: Each checkpoint location has a device that detects its own location
+- **Benefits**: Eliminates human error in data entry and ensures real-time updates
+
+For technical details on the Raspberry Pi implementation, see the [src/raspberryPi/README.md](src/raspberryPi/README.md) file.
 
 ## Contract Addresses (Scroll Network)
 
@@ -146,4 +171,3 @@ At each checkpoint, our staff scan the NFC tags embedded in the donated goods, u
 ## Future Implementation
 
 - Add governance token for donators, which allows them to participate in DAO
-- QR Code with NFC for tracking system
