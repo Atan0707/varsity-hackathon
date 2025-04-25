@@ -1,64 +1,23 @@
 import React from 'react';
 import { Pool } from '@/utils/poolData';
 import { useQuery } from '@tanstack/react-query';
-import { gql, request } from 'graphql-request';
-import { SUBGRAPH_URL } from '@/utils/config';
+import { fetchDonations, DonatorData } from '@/utils/graphql';
 
 interface DonatorsProps {
   pool: Pool;
 }
 
-interface Donator {
-  donor: string;
-  amount: string;
-  blockTimestamp: string;
-  transactionHash: string;
-}
-
-interface DonationsResponse {
-  donationReceiveds: Donator[];
-}
-
-const truncateAddress = (address: string): string => {
-  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-};
-
 const Donators: React.FC<DonatorsProps> = ({ pool }) => {
-  // GraphQL query to fetch all donations for a specific pool
-  const getDonationsQuery = gql`
-    query GetPoolDonations($poolId: BigInt!) {
-      donationReceiveds(
-        where: { poolId: $poolId }
-        orderBy: blockTimestamp
-        orderDirection: desc
-      ) {
-        donor
-        amount
-        blockTimestamp
-        transactionHash
-      }
-    }
-  `;
-
   // Use react-query to fetch and cache the donations data
-  const { data, isLoading, error } = useQuery<DonationsResponse>({
+  const { data, isLoading, error } = useQuery<DonatorData[]>({
     queryKey: ['poolDonations', pool.id],
-    queryFn: async (): Promise<DonationsResponse> => {
-      const response = await request<DonationsResponse>(
-        SUBGRAPH_URL,
-        getDonationsQuery,
-        { poolId: pool.id }
-      );
-      return response;
-    },
+    queryFn: () => fetchDonations(pool.id),
     // Don't refetch on window focus to save API calls
     refetchOnWindowFocus: false,
   });
 
   // Get the donations array from the response
-  const donations = React.useMemo(() => {
-    return data?.donationReceiveds || [];
-  }, [data]);
+  const donations = data || [];
 
   // Calculate the unique donator count by filtering unique donor addresses
   const uniqueDonators = React.useMemo(() => {
@@ -88,6 +47,12 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
       minimumFractionDigits: 2, 
       maximumFractionDigits: 6
     });
+  };
+
+  // Helper function to truncate address
+  const truncateAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
   return (
@@ -138,21 +103,21 @@ const Donators: React.FC<DonatorsProps> = ({ pool }) => {
                   </td>
                 </tr>
               ) : (
-                donations.map((donator: Donator, index) => (
-                  <tr key={`${donator.transactionHash}-${index}`} className="hover:bg-gray-50">
+                donations.map((donation: DonatorData, index) => (
+                  <tr key={`${donation.transactionHash}-${index}`} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {truncateAddress(donator.transactionHash)}
+                        {truncateAddress(donation.transactionHash)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-gray-900">
-                         {formatAmount(donator.amount)} ETH
+                         {formatAmount(donation.amount)} ETH
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {formatTimestamp(donator.blockTimestamp)}
+                        {formatTimestamp(donation.blockTimestamp)}
                       </div>
                     </td>
                   </tr>
